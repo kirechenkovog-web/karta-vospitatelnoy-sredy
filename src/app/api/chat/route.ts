@@ -79,8 +79,8 @@ function getStagePrompt(stage: number, aspectTitle?: string, isAuto?: boolean, h
     return `Пользователь оценивает аспект «${aspectTitle}». Веди его по структуре: оценка → «что для вас 10/10» → «что уже есть сейчас» → сохранение.${hintsBlock}`;
   }
   if (stage === 1 && !aspectTitle) {
-    if (isAuto) return `Пользователь только что вошёл на главную карту (этап 1). Поприветствуй его и объясни, как работает карта — что нужно оценить все 12 аспектов по шкале 0–10, начиная с любого. Предложи начать.`;
-    return "Помоги пользователю выбрать, с какого аспекта начать оценку карты.";
+    if (isAuto) return `Пользователь только что вошёл на главную карту (этап 1). Поприветствуй его в 1-2 предложения и скажи что нужно кликнуть на любой аспект чтобы начать. НЕ обсуждай конкретные аспекты. Подсвети любую одну карточку аспекта — используй команду [ACTION:highlight:aspect-card-social_partners] или другую карточку на свой выбор.`;
+    return "Пользователь на главной карте. Не обсуждай аспекты — предложи кликнуть на любую карточку чтобы начать. Можешь подсветить одну карточку.";
   }
   if (stage === 2) {
     if (isAuto) return `Пользователь перешёл к этапу 2 — углублённому анализу. Поздравь его с завершением оценки всех аспектов и объясни задачу: выбрать значимые аспекты и описать по ним результаты, ресурсы, вызовы и индикаторы. ${aspectTitle ? `Сейчас он открыл аспект «${aspectTitle}».` : ""}`;
@@ -95,7 +95,7 @@ function getStagePrompt(stage: number, aspectTitle?: string, isAuto?: boolean, h
 
 // Parse [ACTION:highlight:element-id] from end of message
 function parseAction(reply: string): { text: string; highlightId: string | null } {
-  const actionRegex = /\[ACTION:highlight:([a-zA-Z-]+)\]\s*$/;
+  const actionRegex = /\[ACTION:highlight:([\w-]+)\]\s*$/;
   const match = reply.match(actionRegex);
   if (match) {
     return {

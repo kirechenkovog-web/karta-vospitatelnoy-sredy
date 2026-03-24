@@ -152,6 +152,7 @@ export default function AiSidebar({
         // Use AI highlight or fallback by stage context
         const hl = data.highlightId ||
           (stageRef.current === 1 && aspectRef.current ? "score-selector" : null) ||
+          (stageRef.current === 1 && !aspectRef.current ? "aspect-card-social_partners" : null) ||
           (stageRef.current === 3 ? "focus-selector" : null);
         if (hl) setHighlight(hl);
       } catch {
