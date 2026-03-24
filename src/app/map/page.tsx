@@ -7,6 +7,7 @@ import { ASPECTS } from "@/data/aspects";
 import AppShell from "@/components/AppShell";
 import StageNav from "@/components/StageNav";
 import { useHighlightedElement } from "@/contexts/HighlightContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface AspectScore {
   aspectCode: string;
@@ -23,10 +24,11 @@ interface Session {
 
 // ─── SVG illustrations ─────────────────────────────────────────────────────
 
-function Illus({ code, color, active }: { code: string; color: string; active: boolean }) {
-  const s = active ? color : "#4a4a62";
-  const f = active ? color + "22" : "#1d1d28";
-  const sd = active ? color + "70" : "#2e2e42";
+function Illus({ code, color, active, isLight }: { code: string; color: string; active: boolean; isLight: boolean }) {
+  const s = active ? color : (isLight ? "#b0b0c8" : "#4a4a62");
+  const f = active ? color + "22" : (isLight ? "#e8e8f0" : "#1d1d28");
+  const f2 = active ? color + "30" : (isLight ? "#e0e0ea" : "#232332");
+  const sd = active ? color + "70" : (isLight ? "#c8c8dc" : "#2e2e42");
 
   const map: Record<string, React.ReactNode> = {
 
@@ -39,7 +41,7 @@ function Illus({ code, color, active }: { code: string; color: string; active: b
         <circle cx="66" cy="16" r="7" fill={f} stroke={s} strokeWidth="1.6" />
         <path d="M58 35 Q66 29 74 35" fill={f} stroke={s} strokeWidth="1.6" />
         {/* center node */}
-        <circle cx="40" cy="28" r="8" fill={active ? color + "30" : "#232332"} stroke={s} strokeWidth="1.6" />
+        <circle cx="40" cy="28" r="8" fill={f2} stroke={s} strokeWidth="1.6" />
         <path d="M36 28 L44 28 M40 24 L40 32" stroke={s} strokeWidth="1.8" strokeLinecap="round" />
         {/* connection dashes */}
         <line x1="22" y1="23" x2="32" y2="27" stroke={sd} strokeWidth="1.2" strokeDasharray="3,2" />
@@ -123,7 +125,7 @@ function Illus({ code, color, active }: { code: string; color: string; active: b
         {/* calendar body */}
         <rect x="8" y="14" width="52" height="40" rx="3" fill={f} stroke={s} strokeWidth="1.6" />
         {/* header */}
-        <rect x="8" y="14" width="52" height="13" rx="3" fill={active ? color + "28" : "#232332"} stroke={s} strokeWidth="1.6" />
+        <rect x="8" y="14" width="52" height="13" rx="3" fill={f2} stroke={s} strokeWidth="1.6" />
         {/* rings */}
         <rect x="22" y="9" width="4" height="9" rx="2" fill={f} stroke={s} strokeWidth="1.5" />
         <rect x="42" y="9" width="4" height="9" rx="2" fill={f} stroke={s} strokeWidth="1.5" />
@@ -212,7 +214,7 @@ function Illus({ code, color, active }: { code: string; color: string; active: b
     collectives: (
       <>
         {/* center circle */}
-        <circle cx="40" cy="28" r="7" fill={active ? color + "30" : "#232332"} stroke={s} strokeWidth="1.6" />
+        <circle cx="40" cy="28" r="7" fill={f2} stroke={s} strokeWidth="1.6" />
         <path d="M37 28 L43 28 M40 25 L40 31" stroke={s} strokeWidth="1.6" strokeLinecap="round" />
         {/* 6 people around */}
         {([0, 1, 2, 3, 4, 5] as number[]).map(i => {
@@ -239,14 +241,14 @@ function Illus({ code, color, active }: { code: string; color: string; active: b
         {/* document */}
         <rect x="6" y="6" width="38" height="48" rx="3" fill={f} stroke={s} strokeWidth="1.6" />
         <path d="M6 16 L44 16" stroke={s} strokeWidth="1.3" />
-        <rect x="6" y="6" width="38" height="10" rx="3" fill={active ? color + "28" : "#232332"} stroke={s} strokeWidth="1.6" />
+        <rect x="6" y="6" width="38" height="10" rx="3" fill={f2} stroke={s} strokeWidth="1.6" />
         <line x1="12" y1="24" x2="38" y2="24" stroke={sd} strokeWidth="1.1" />
         <line x1="12" y1="30" x2="38" y2="30" stroke={sd} strokeWidth="1.1" />
         <line x1="12" y1="36" x2="30" y2="36" stroke={sd} strokeWidth="1.1" />
         {/* checkmark */}
         <path d="M14 44 L19 50 L30 38" stroke={s} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
         {/* coins */}
-        <circle cx="62" cy="20" r="12" fill={active ? color + "25" : "#222235"} stroke={s} strokeWidth="1.6" />
+        <circle cx="62" cy="20" r="12" fill={f2} stroke={s} strokeWidth="1.6" />
         <circle cx="62" cy="20" r="7" fill={f} stroke={sd} strokeWidth="1" />
         <line x1="62" y1="15" x2="62" y2="25" stroke={s} strokeWidth="1.5" />
         <line x1="58" y1="18" x2="66" y2="18" stroke={s} strokeWidth="1.2" />
@@ -262,11 +264,11 @@ function Illus({ code, color, active }: { code: string; color: string; active: b
         <rect x="8" y="40" width="12" height="14" rx="1.5" fill={f} stroke={s} strokeWidth="1.5" />
         <rect x="24" y="30" width="12" height="24" rx="1.5" fill={f} stroke={s} strokeWidth="1.5" />
         <rect x="40" y="20" width="12" height="34" rx="1.5" fill={f} stroke={s} strokeWidth="1.5" />
-        <rect x="56" y="10" width="12" height="44" rx="1.5" fill={active ? color + "30" : "#252535"} stroke={s} strokeWidth="1.5" />
+        <rect x="56" y="10" width="12" height="44" rx="1.5" fill={f2} stroke={s} strokeWidth="1.5" />
         {/* trend line */}
         <path d="M14 38 L30 28 L46 18 L62 8" stroke={s} strokeWidth="1.5" strokeDasharray="3,2" fill="none" />
         {/* graduation cap */}
-        <path d="M58 4 L72 9 L58 14 L44 9 Z" fill={active ? color + "40" : "#252535"} stroke={s} strokeWidth="1.4" />
+        <path d="M58 4 L72 9 L58 14 L44 9 Z" fill={f2} stroke={s} strokeWidth="1.4" />
         <line x1="72" y1="9" x2="72" y2="18" stroke={s} strokeWidth="1.4" />
         <circle cx="72" cy="20" r="2.5" fill={s} />
         {/* x axis */}
@@ -290,6 +292,7 @@ function AspectCard({ aspect, score, isCompleted }: {
   isCompleted: boolean;
 }) {
   const { isHighlighted, onInteract } = useHighlightedElement(`aspect-card-${aspect.code}`);
+  const { theme } = useTheme();
 
   return (
     <Link href={`/map/${aspect.code}`}>
@@ -319,7 +322,7 @@ function AspectCard({ aspect, score, isCompleted }: {
 
         {/* illustration */}
         <div className="px-4 pt-5 pb-1" style={{ height: 148 }}>
-          <Illus code={aspect.code} color={aspect.color} active={isCompleted} />
+          <Illus code={aspect.code} color={aspect.color} active={isCompleted} isLight={theme === "light"} />
         </div>
 
         {/* label */}
