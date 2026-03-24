@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String              @id @default(cuid())
+  name      String
+  email     String              @unique
+  createdAt DateTime            @default(now())
+  sessions  AssessmentSession[]
+}
+
+model AssessmentSession {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  status       String           @default("in_progress")
+  currentStage Int              @default(1)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  scores       AspectScore[]
+  deepDives    AspectDeepDive[]
+  focusPlan    FocusPlan?
+  aiMessages   AIMessage[]
+}
+
+model AspectScore {
+  id               String            @id @default(cuid())
+  sessionId        String
+  session          AssessmentSession @relation(fields: [sessionId], references: [id])
+  aspectCode       String
+  score            Int?
+  tenOfTenText     String?
+  currentStateText String?
+  status           String            @default("not_started")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@unique([sessionId, aspectCode])
+}
+
+model AspectDeepDive {
+  id             String            @id @default(cuid())
+  sessionId      String
+  session        AssessmentSession @relation(fields: [sessionId], references: [id])
+  aspectCode     String
+  resultsText    String?
+  resourcesText  String?
+  challengesText String?
+  indicatorsText String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@unique([sessionId, aspectCode])
+}
+
+model FocusPlan {
+  id                 String            @id @default(cuid())
+  sessionId          String            @unique
+  session            AssessmentSession @relation(fields: [sessionId], references: [id])
+  focusAspects       String
+  targetResult       String?
+  crossResourcesText String?
+  firstStepsText     String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model AIMessage {
+  id          String            @id @default(cuid())
+  sessionId   String
+  session     AssessmentSession @relation(fields: [sessionId], references: [id])
+  stage       Int
+  aspectCode  String?
+  role        String
+  messageText String
+  createdAt   DateTime          @default(now())
+}
