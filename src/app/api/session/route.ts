@@ -1,43 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
-  const { name, email } = await req.json();
-
-  if (!name || !email) {
-    return NextResponse.json({ error: "Имя и email обязательны" }, { status: 400 });
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
   }
 
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: { name },
-    create: { name, email },
-  });
+  const userId = session.user.id;
 
-  const session = await prisma.assessmentSession.findFirst({
-    where: { userId: user.id, status: "in_progress" },
+  const existing = await prisma.assessmentSession.findFirst({
+    where: { userId, status: "in_progress" },
     orderBy: { updatedAt: "desc" },
-    include: {
-      scores: true,
-      deepDives: true,
-      focusPlan: true,
-    },
+    include: { scores: true, deepDives: true, focusPlan: true },
   });
 
-  if (session) {
-    return NextResponse.json({ user, session });
+  if (existing) {
+    return NextResponse.json({ session: existing });
   }
 
   const newSession = await prisma.assessmentSession.create({
-    data: { userId: user.id },
-    include: {
-      scores: true,
-      deepDives: true,
-      focusPlan: true,
-    },
+    data: { userId },
+    include: { scores: true, deepDives: true, focusPlan: true },
   });
 
-  return NextResponse.json({ user, session: newSession });
+  return NextResponse.json({ session: newSession });
 }
 
 export async function GET(req: NextRequest) {
@@ -48,12 +36,7 @@ export async function GET(req: NextRequest) {
 
   const session = await prisma.assessmentSession.findUnique({
     where: { id: sessionId },
-    include: {
-      scores: true,
-      deepDives: true,
-      focusPlan: true,
-      user: true,
-    },
+    include: { scores: true, deepDives: true, focusPlan: true, user: true },
   });
 
   if (!session) {

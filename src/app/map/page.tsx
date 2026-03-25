@@ -415,21 +415,16 @@ function MapContent({ session, userName }: { session: Session; userName: string 
 export default function MapPage() {
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
-  const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const sessionId = localStorage.getItem("sessionId");
-    const name = localStorage.getItem("userName") || "";
-    setUserName(name);
-    if (!sessionId) { router.push("/"); return; }
-
-    fetch(`/api/session?sessionId=${sessionId}`)
+    fetch("/api/session", { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) router.push("/");
-        else setSession(data);
+        if (data.error) router.push("/login");
+        else setSession(data.session);
       })
+      .catch(() => router.push("/login"))
       .finally(() => setLoading(false));
   }, [router]);
 
@@ -448,7 +443,7 @@ export default function MapPage() {
       autoTrigger="Пользователь открыл главную карту — этап 1. Начни работу."
       header={<div />}
     >
-      <MapContent session={session} userName={userName} />
+      <MapContent session={session} userName="" />
     </AppShell>
   );
 }

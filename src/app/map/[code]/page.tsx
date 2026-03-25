@@ -245,27 +245,32 @@ export default function AspectPage({ params }: { params: Promise<{ code: string 
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const sid = localStorage.getItem("sessionId");
-    if (!sid) { router.push("/"); return; }
-    setSessionId(sid);
-
-    fetch(`/api/session?sessionId=${sid}`)
+    fetch("/api/session", { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
-        const existing = data.scores?.find((s: AspectScore) => s.aspectCode === code);
-        setInitialScore(existing);
+        if (data.error) { router.push("/login"); return; }
+        const sid = data.session.id;
+        setSessionId(sid);
 
-        const completed = (data.scores ?? []).filter((s: AspectScore) => s.status === "completed");
-        if (completed.length > 0) {
-          const lines = completed.map((s: AspectScore) => {
-            const asp = ASPECTS.find((a) => a.code === s.aspectCode);
-            return `${asp?.shortTitle ?? s.aspectCode}: ${s.score}/10`;
+        return fetch(`/api/session?sessionId=${sid}`)
+          .then((r) => r.json())
+          .then((full) => {
+            const existing = full.scores?.find((s: AspectScore) => s.aspectCode === code);
+            setInitialScore(existing);
+
+            const completed = (full.scores ?? []).filter((s: AspectScore) => s.status === "completed");
+            if (completed.length > 0) {
+              const lines = completed.map((s: AspectScore) => {
+                const asp = ASPECTS.find((a) => a.code === s.aspectCode);
+                return `${asp?.shortTitle ?? s.aspectCode}: ${s.score}/10`;
+              });
+              setSessionContext(`Оценено ${completed.length}/12 аспектов. ${lines.join(", ")}.`);
+            }
+
+            setLoaded(true);
           });
-          setSessionContext(`Оценено ${completed.length}/12 аспектов. ${lines.join(", ")}.`);
-        }
-
-        setLoaded(true);
-      });
+      })
+      .catch(() => router.push("/login"));
   }, [code, router]);
 
   if (!aspect) return null;

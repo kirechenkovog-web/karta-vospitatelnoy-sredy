@@ -232,29 +232,28 @@ function FieldBlock({
 export default function Stage2Page() {
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
-  const [userName, setUserName] = useState("");
   const [sessionContext, setSessionContext] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const sid = localStorage.getItem("sessionId");
-    const name = localStorage.getItem("userName") || "";
-    setUserName(name);
-    if (!sid) { router.push("/"); return; }
-
-    fetch(`/api/session?sessionId=${sid}`)
+    fetch("/api/session", { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) { router.push("/"); return; }
-        const completed = data.scores?.filter((s: AspectScore) => s.status === "completed");
-        if (!completed || completed.length < 12) { router.push("/map"); return; }
-
-        const lines = completed.map((s: AspectScore) => {
-          const asp = ASPECTS.find((a) => a.code === s.aspectCode);
-          return `${asp?.shortTitle ?? s.aspectCode}: ${s.score}/10`;
-        });
-        setSessionContext(`Все 12 аспектов оценены. ${lines.join(", ")}.`);
-        setSession(data);
-      });
+        if (data.error) { router.push("/login"); return; }
+        return fetch(`/api/session?sessionId=${data.session.id}`)
+          .then((r) => r.json())
+          .then((full) => {
+            if (full.error) { router.push("/login"); return; }
+            const completed = full.scores?.filter((s: AspectScore) => s.status === "completed");
+            if (!completed || completed.length < 12) { router.push("/map"); return; }
+            const lines = completed.map((s: AspectScore) => {
+              const asp = ASPECTS.find((a) => a.code === s.aspectCode);
+              return `${asp?.shortTitle ?? s.aspectCode}: ${s.score}/10`;
+            });
+            setSessionContext(`Все 12 аспектов оценены. ${lines.join(", ")}.`);
+            setSession(full);
+          });
+      })
+      .catch(() => router.push("/login"));
   }, [router]);
 
   if (!session) {
@@ -273,7 +272,7 @@ export default function Stage2Page() {
       sessionContext={sessionContext}
       header={<div />}
     >
-      <Stage2Content session={session} userName={userName} />
+      <Stage2Content session={session} userName="" />
     </AppShell>
   );
 }

@@ -239,34 +239,33 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
 export default function Stage3Page() {
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
-  const [userName, setUserName] = useState("");
   const [sessionContext, setSessionContext] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const sid = localStorage.getItem("sessionId");
-    const name = localStorage.getItem("userName") || "";
-    setUserName(name);
-    if (!sid) { router.push("/"); return; }
-
-    fetch(`/api/session?sessionId=${sid}`)
+    fetch("/api/session", { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) { router.push("/"); return; }
-        if (!data.deepDives?.length) { router.push("/stage2"); return; }
-
-        const lines = (data.scores ?? [])
-          .filter((s: AspectScore) => s.score != null)
-          .map((s: AspectScore) => {
-            const asp = ASPECTS.find((a) => a.code === s.aspectCode);
-            return `${asp?.shortTitle ?? s.aspectCode}: ${s.score}/10`;
+        if (data.error) { router.push("/login"); return; }
+        return fetch(`/api/session?sessionId=${data.session.id}`)
+          .then((r) => r.json())
+          .then((full) => {
+            if (full.error) { router.push("/login"); return; }
+            if (!full.deepDives?.length) { router.push("/stage2"); return; }
+            const lines = (full.scores ?? [])
+              .filter((s: AspectScore) => s.score != null)
+              .map((s: AspectScore) => {
+                const asp = ASPECTS.find((a) => a.code === s.aspectCode);
+                return `${asp?.shortTitle ?? s.aspectCode}: ${s.score}/10`;
+              });
+            const divedTitles = (full.deepDives ?? []).map((dd: { aspectCode: string }) => {
+              const asp = ASPECTS.find((a) => a.code === dd.aspectCode);
+              return asp?.shortTitle ?? dd.aspectCode;
+            });
+            setSessionContext(`Оценки: ${lines.join(", ")}. Углублённый анализ по: ${divedTitles.join(", ")}.`);
+            setSession(full);
           });
-        const divedTitles = (data.deepDives ?? []).map((dd: { aspectCode: string }) => {
-          const asp = ASPECTS.find((a) => a.code === dd.aspectCode);
-          return asp?.shortTitle ?? dd.aspectCode;
-        });
-        setSessionContext(`Оценки: ${lines.join(", ")}. Углублённый анализ по: ${divedTitles.join(", ")}.`);
-        setSession(data);
-      });
+      })
+      .catch(() => router.push("/login"));
   }, [router]);
 
   if (!session) {
@@ -285,7 +284,7 @@ export default function Stage3Page() {
       sessionContext={sessionContext}
       header={<div />}
     >
-      <Stage3Content session={session} userName={userName} />
+      <Stage3Content session={session} userName="" />
     </AppShell>
   );
 }
