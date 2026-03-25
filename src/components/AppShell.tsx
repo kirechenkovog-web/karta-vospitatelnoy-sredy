@@ -5,6 +5,7 @@ import { HighlightProvider } from "@/contexts/HighlightContext";
 import { AiEventProvider } from "@/contexts/AiEventContext";
 import AiSidebar from "@/components/AiSidebar";
 import ThemeToggle from "@/components/ThemeToggle";
+import UserMenu from "@/components/UserMenu";
 
 interface AppShellProps {
   sessionId: string;
@@ -32,8 +33,9 @@ export default function AppShell({
           {/* Top header */}
           <div className="flex-shrink-0 flex items-center" style={{ borderBottom: "1px solid var(--border)", minHeight: header ? undefined : 0 }}>
             <div className="flex-1">{header}</div>
-            <div className="px-3 py-2 flex-shrink-0">
+            <div className="px-3 py-2 flex items-center gap-2 flex-shrink-0">
               <ThemeToggle />
+              <UserMenu />
             </div>
           </div>
 
