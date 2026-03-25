@@ -22,11 +22,17 @@ export default function LoginPage() {
         password,
         redirect: false,
       });
-      if (res?.error) {
-        setError("Неверный email или пароль");
-      } else {
+      if (!res) {
+        setError("Нет ответа от сервера");
+      } else if (res.error) {
+        setError("Неверный email или пароль (" + res.error + ")");
+      } else if (res.ok) {
         router.push("/map");
+      } else {
+        setError("Неизвестный ответ: " + JSON.stringify(res));
       }
+    } catch (e) {
+      setError("Ошибка: " + String(e));
     } finally {
       setLoading(false);
     }
