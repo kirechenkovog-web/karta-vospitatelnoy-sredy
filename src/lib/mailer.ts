@@ -1,14 +1,6 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.yandex.ru",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export function generatePassword(): string {
   const chars = "abcdefghjkmnpqrstuvwxyz23456789";
@@ -26,8 +18,8 @@ export async function sendPasswordEmail(to: string, password: string, isReset = 
 
   const action = isReset ? "Ваш новый пароль" : "Ваш пароль для входа";
 
-  await transporter.sendMail({
-    from: `"Карта воспитательной среды" <${process.env.SMTP_USER}>`,
+  await resend.emails.send({
+    from: "Карта воспитательной среды <onboarding@resend.dev>",
     to,
     subject,
     html: `
