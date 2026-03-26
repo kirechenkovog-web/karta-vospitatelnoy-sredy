@@ -40,6 +40,30 @@ function Illus({ code, active }: { code: string; active: boolean }) {
   );
 }
 
+// ─── Score circle ────────────────────────────────────────────────────────────
+
+function ScoreCircle({ score, color }: { score: number; color: string }) {
+  const r = 17;
+  const circ = 2 * Math.PI * r;
+  const filled = (score / 10) * circ;
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
+      <circle cx="24" cy="24" r={r} fill="none" stroke={color + "25"} strokeWidth="3.5" />
+      <circle
+        cx="24" cy="24" r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth="3.5"
+        strokeDasharray={`${filled} ${circ - filled}`}
+        strokeLinecap="round"
+        transform="rotate(-90 24 24)"
+      />
+      <text x="24" y="21" textAnchor="middle" fontSize="11" fontWeight="700" fill={color}>{score}</text>
+      <text x="24" y="31" textAnchor="middle" fontSize="8" fill={color + "99"}>из 10</text>
+    </svg>
+  );
+}
+
 // ─── Card ───────────────────────────────────────────────────────────────────
 
 function AspectCard({ aspect, score, isCompleted }: {
@@ -59,36 +83,31 @@ function AspectCard({ aspect, score, isCompleted }: {
           background: isCompleted ? aspect.color + "12" : "var(--surface)",
           border: `1px solid ${isCompleted ? aspect.color + "40" : "var(--border)"}`,
           boxShadow: isCompleted ? `0 4px 20px ${aspect.color}20` : "var(--card-shadow)",
-          minHeight: 190,
+          minHeight: 220,
           opacity: isCompleted ? 1 : 0.75,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {/* top color line */}
         <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: isCompleted ? aspect.color : "transparent" }} />
 
-        {/* score badge */}
-        {isCompleted && score?.score != null && (
+        {/* header: title left, score right */}
+        <div className="flex items-start justify-between px-3 pt-3" style={{ minHeight: 52 }}>
           <div
-            className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold z-10"
-            style={{ background: aspect.color, color: "#fff" }}
-          >
-            {score.score}
-          </div>
-        )}
-
-        {/* illustration */}
-        <div className="px-4 pt-5 pb-1" style={{ height: 148 }}>
-          <Illus code={aspect.code} active={isCompleted} />
-        </div>
-
-        {/* label */}
-        <div className="px-3 pb-3 text-center">
-          <div
-            className="text-xs font-medium leading-tight"
-            style={{ color: isCompleted ? aspect.color : "var(--muted)" }}
+            className="font-semibold leading-snug pr-2"
+            style={{ color: isCompleted ? aspect.color : "var(--muted)", fontSize: 13, maxWidth: "65%" }}
           >
             {aspect.shortTitle}
           </div>
+          {isCompleted && score?.score != null && (
+            <ScoreCircle score={score.score} color={aspect.color} />
+          )}
+        </div>
+
+        {/* illustration — fills remaining space */}
+        <div className="flex-1 px-3 pb-3" style={{ minHeight: 140 }}>
+          <Illus code={aspect.code} active={isCompleted} />
         </div>
       </div>
     </Link>
