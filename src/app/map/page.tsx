@@ -416,7 +416,13 @@ function MapPageInner() {
   useEffect(() => {
     const sessionIdParam = searchParams.get("sessionId");
     const isNew = searchParams.get("new") === "1";
-    const skipOnboarding = searchParams.get("ob") === "1";
+
+    // Onboarding: show once per login session using sessionStorage
+    const onboardingShown = sessionStorage.getItem("onboardingShown");
+    if (!onboardingShown) {
+      router.push("/onboarding");
+      return;
+    }
 
     const sessionPromise = sessionIdParam
       ? fetch(`/api/session?sessionId=${sessionIdParam}`).then((r) => r.json()).then((d) => ({ session: d }))
@@ -426,12 +432,8 @@ function MapPageInner() {
           body: JSON.stringify({ forceNew: isNew }),
         }).then((r) => r.json());
 
-    Promise.all([
-      skipOnboarding ? Promise.resolve({ onboardingDone: true }) : fetch("/api/onboarding").then((r) => r.json()),
-      sessionPromise,
-    ])
-      .then(([onb, sessionData]) => {
-        if (!onb.onboardingDone) { router.push("/onboarding"); return; }
+    sessionPromise
+      .then((sessionData) => {
         if (sessionData.error) { router.push("/login"); return; }
         const sid = sessionIdParam ? sessionIdParam : sessionData.session.id;
         return fetch(`/api/session?sessionId=${sid}`)
@@ -439,7 +441,7 @@ function MapPageInner() {
           .then((full) => {
             if (full.error) { router.push("/login"); return; }
             setSession(full);
-            if (isNew || skipOnboarding) router.replace("/map");
+            if (isNew) router.replace("/map");
           });
       })
       .catch(() => router.push("/login"))

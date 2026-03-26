@@ -366,7 +366,8 @@ export default function OnboardingPage() {
   const markDone = useCallback(async () => {
     setFinishing(true);
     await fetch("/api/onboarding", { method: "POST" });
-    router.push("/map?ob=1");
+    sessionStorage.setItem("onboardingShown", "1");
+    router.push("/map");
   }, [router]);
 
   const handleButton = useCallback(async (value: string) => {

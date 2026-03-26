@@ -27,6 +27,7 @@ export default function LoginPage() {
       } else if (res.error) {
         setError("Неверный email или пароль (" + res.error + ")");
       } else if (res.ok) {
+        sessionStorage.removeItem("onboardingShown");
         router.push("/map");
       } else {
         setError("Неизвестный ответ: " + JSON.stringify(res));

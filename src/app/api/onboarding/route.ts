@@ -7,10 +7,8 @@ export async function GET() {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
   }
-  // TODO: restore real check after testing:
-  // const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  // return NextResponse.json({ onboardingDone: user?.onboardingDone ?? false });
-  return NextResponse.json({ onboardingDone: false });
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+  return NextResponse.json({ onboardingDone: user?.onboardingDone ?? false });
 }
 
 export async function POST(_req: NextRequest) {
