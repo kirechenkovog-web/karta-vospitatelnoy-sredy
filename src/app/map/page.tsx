@@ -180,12 +180,12 @@ function InlineAspectView({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // Apply AI-suggested score if user hasn't set one yet
+  // Apply AI-suggested score (always — user can click to override)
   useEffect(() => {
-    if (suggestedScore !== null && score === null) {
+    if (suggestedScore !== null) {
       setScore(suggestedScore);
     }
-  }, [suggestedScore, score]);
+  }, [suggestedScore]);
 
   async function handleSave() {
     if (score === null) return;
@@ -444,9 +444,6 @@ export default function MapPage() {
   const handleOpenAspect = useCallback((code: string) => {
     setOpenAspect(code);
     setHasOpenedAspect(true);
-    // Clear previous AI notes for this aspect (fresh conversation)
-    setAiNotes((prev) => ({ ...prev, [code]: [] }));
-    setSuggestedScores((prev) => ({ ...prev }));
   }, []);
 
   const handleCloseAspect = useCallback(() => {

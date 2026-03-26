@@ -41,7 +41,6 @@ export default function AiSidebar({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showHintsButton, setShowHintsButton] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { setHighlight } = useHighlight();
   const { registerHandler } = useAiEvent();
@@ -154,13 +153,11 @@ export default function AiSidebar({
     return unregister;
   }, [registerHandler, setHighlight]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-trigger on context change
+  // Auto-trigger on context change — history persists, messages are appended
   useEffect(() => {
     if (!autoTrigger) return;
-    setMessages([]);
     setLoading(false);
     loadingRef.current = false;
-    setShowHintsButton(false);
 
     let cancelled = false;
     const timer = setTimeout(async () => {
@@ -168,11 +165,10 @@ export default function AiSidebar({
       loadingRef.current = true;
       setLoading(true);
       try {
-        const data = await callChat(autoTrigger, [], true);
+        const data = await callChat(autoTrigger, messagesRef.current, true);
         if (cancelled) return;
         const reply = handleAiResponse(data);
-        setMessages([{ role: "assistant", content: reply }]);
-        if (stageRef.current === 1 && aspectRef.current) setShowHintsButton(true);
+        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
         // Fallback highlights if AI didn't send one
         if (!data.highlightId) {
           const fallback =
@@ -182,7 +178,7 @@ export default function AiSidebar({
           if (fallback) setHighlight(fallback);
         }
       } catch {
-        if (!cancelled) setMessages([{ role: "assistant", content: "Не удалось загрузить контекст." }]);
+        if (!cancelled) setMessages((prev) => [...prev, { role: "assistant", content: "Не удалось загрузить контекст." }]);
       } finally {
         if (!cancelled) { loadingRef.current = false; setLoading(false); }
       }
@@ -199,7 +195,6 @@ export default function AiSidebar({
     const text = input.trim();
     if (!text || loading) return;
     setInput("");
-    setShowHintsButton(false);
 
     const newMessages: Message[] = [...messages, { role: "user", content: text }];
     setMessages(newMessages);
@@ -322,36 +317,6 @@ export default function AiSidebar({
                   <span className="animate-pulse" style={{ color: "#4F46E5", animationDelay: "0.2s" }}>●</span>
                   <span className="animate-pulse" style={{ color: "#4F46E5", animationDelay: "0.4s" }}>●</span>
                 </div>
-              </div>
-            )}
-
-            {showHintsButton && !loading && (
-              <div className="flex justify-start pl-8">
-                <button
-                  onClick={async () => {
-                    setShowHintsButton(false);
-                    const text = "Задай наводящие вопросы";
-                    const userMsg: Message = { role: "user", content: text };
-                    const updated = [...messagesRef.current, userMsg];
-                    setMessages(updated);
-                    loadingRef.current = true;
-                    setLoading(true);
-                    try {
-                      const data = await callChat(text, updated, false);
-                      const reply = handleAiResponse(data);
-                      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-                    } catch {
-                      setMessages((prev) => [...prev, { role: "assistant", content: "Ошибка соединения." }]);
-                    } finally {
-                      loadingRef.current = false;
-                      setLoading(false);
-                    }
-                  }}
-                  className="px-3 py-1.5 rounded-xl text-sm transition-all hover:opacity-80"
-                  style={{ background: "#4F46E515", color: "#4F46E5", border: "1px solid #4F46E540", cursor: "pointer" }}
-                >
-                  💡 Задай наводящие вопросы
-                </button>
               </div>
             )}
 
