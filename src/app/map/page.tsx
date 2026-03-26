@@ -28,7 +28,7 @@ function Illus({ code, active }: { code: string; active: boolean }) {
     <img
       src={`/illustrations/${code}.png`}
       alt=""
-      style={{ width: "100%", height: "100%", objectFit: "contain" }}
+      style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 6 }}
     />
   );
 }
@@ -73,10 +73,11 @@ function AspectCard({ aspect, score, isCompleted }: {
         onClick={onInteract}
         className={`relative cursor-pointer rounded-2xl overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97] ${isHighlighted ? "ai-highlighted" : ""}`}
         style={{
-          background: isCompleted ? aspect.color + "12" : "var(--surface)",
-          border: `1px solid ${isCompleted ? aspect.color + "40" : "var(--border)"}`,
-          boxShadow: isCompleted ? `0 4px 20px ${aspect.color}20` : "var(--card-shadow)",
-          minHeight: 170,
+          background: "white",
+          border: `2px solid ${isCompleted ? aspect.color + "80" : "var(--border)"}`,
+          boxShadow: isCompleted ? `0 4px 16px ${aspect.color}25` : "var(--card-shadow)",
+          height: 170,
+          overflow: "hidden",
           display: "flex",
           flexDirection: "column",
         }}
@@ -98,7 +99,7 @@ function AspectCard({ aspect, score, isCompleted }: {
         </div>
 
         {/* illustration — fills remaining space */}
-        <div className="flex-1 px-2 pb-2" style={{ minHeight: 90 }}>
+        <div className="flex-1 px-2 pb-2" style={{ overflow: "hidden" }}>
           <Illus code={aspect.code} active={isCompleted} />
         </div>
       </div>

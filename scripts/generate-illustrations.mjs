@@ -90,7 +90,7 @@ const BASE_STYLE =
   "gentle cross-hatching for shading, warm sketchbook aesthetic, traditional art feel, " +
   "pure white background, dark pencil lines, warm earthy accent colors, charming hand-crafted details, " +
   "absolutely NO text, NO letters, NO words, NO labels, NO captions, NO numbers, NO typography, " +
-  "square composition, centered subject, sketchbook page style";
+  "wide horizontal landscape composition, subject centered and spread across the width, sketchbook page style";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -176,7 +176,7 @@ async function main() {
       const genResult = await fal.subscribe("fal-ai/flux/schnell", {
         input: {
           prompt,
-          image_size: "square_hd",
+          image_size: "landscape_16_9",
           num_images: 1,
           num_inference_steps: 4,
         },
@@ -184,13 +184,9 @@ async function main() {
       });
 
       const rawUrl = genResult.data.images[0].url;
-      console.log(`   🔄 удаление фона…`);
 
-      // Шаг 2: удаление фона
-      const transparentUrl = await removeBackground(rawUrl);
-
-      // Шаг 3: сохранение
-      await downloadImage(transparentUrl, dest);
+      // Сохранение (белый фон совпадает с фоном карточек)
+      await downloadImage(rawUrl, dest);
       console.log(`   ✅ сохранено → public/illustrations/${filename}`);
     } catch (err) {
       console.error(`   ❌ ошибка: ${err.message}`);
