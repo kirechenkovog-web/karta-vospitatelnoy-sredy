@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ASPECTS, getAspect } from "@/data/aspects";
@@ -393,6 +393,14 @@ function MapGrid({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function MapPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: "var(--background)" }}><div className="text-sm" style={{ color: "var(--muted)" }}>Загрузка...</div></div>}>
+      <MapPageInner />
+    </Suspense>
+  );
+}
+
+function MapPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [session, setSession] = useState<Session | null>(null);
