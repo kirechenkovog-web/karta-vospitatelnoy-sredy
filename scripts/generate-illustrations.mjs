@@ -86,11 +86,12 @@ const ASPECTS = [
 // ─── Стиль ────────────────────────────────────────────────────────────────────
 
 const BASE_STYLE =
-  "hand-drawn pencil and ink sketch illustration, rough imperfect lines, loose gestural strokes, " +
-  "gentle cross-hatching for shading, warm sketchbook aesthetic, traditional art feel, " +
-  "pure white background, dark pencil lines, warm earthy accent colors, charming hand-crafted details, " +
+  "isometric flat illustration, 2.5D isometric vector art, clean 30-degree isometric projection, " +
+  "flat solid colors with no gradients, crisp clean edges, professional icon design style, " +
+  "color palette: teal blue and gold yellow as main accent colors with light gray and white, " +
+  "pure white background, small human figures with simplified faces when relevant, " +
   "absolutely NO text, NO letters, NO words, NO labels, NO captions, NO numbers, NO typography, " +
-  "wide horizontal landscape composition, subject centered and spread across the width, sketchbook page style";
+  "wide horizontal landscape composition, multiple objects spread across the scene, modern isometric design";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -176,7 +177,7 @@ async function main() {
       const genResult = await fal.subscribe("fal-ai/flux/schnell", {
         input: {
           prompt,
-          image_size: "landscape_16_9",
+          image_size: { width: 1280, height: 300 },
           num_images: 1,
           num_inference_steps: 4,
         },
