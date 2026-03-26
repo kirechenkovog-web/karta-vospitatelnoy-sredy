@@ -86,10 +86,11 @@ const ASPECTS = [
 // ─── Стиль ────────────────────────────────────────────────────────────────────
 
 const BASE_STYLE =
-  "flat digital illustration, minimalist vector art, bold simple geometric shapes, " +
-  "pure white solid background, vibrant saturated colors, " +
-  "absolutely NO text, NO letters, NO words, NO labels, NO captions, NO numbers, NO typography, NO watermarks, " +
-  "no gradients, no drop shadows, square composition, centered subject, clean crisp edges, modern app icon style";
+  "hand-drawn pencil and ink sketch illustration, rough imperfect lines, loose gestural strokes, " +
+  "gentle cross-hatching for shading, warm sketchbook aesthetic, traditional art feel, " +
+  "pure white background, dark pencil lines, warm earthy accent colors, charming hand-crafted details, " +
+  "absolutely NO text, NO letters, NO words, NO labels, NO captions, NO numbers, NO typography, " +
+  "square composition, centered subject, sketchbook page style";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -146,6 +147,8 @@ async function main() {
     process.exit(1);
   }
 
+  const force = process.argv.includes("--force");
+
   await mkdir(OUT_DIR, { recursive: true });
   await cleanOldFiles();
 
@@ -158,7 +161,7 @@ async function main() {
     const filename = `${aspect.code}.png`;
     const dest = resolve(OUT_DIR, filename);
 
-    if (await fileExists(dest)) {
+    if (!force && await fileExists(dest)) {
       console.log(`⏭  пропуск ${filename} (уже есть)`);
       skipped++;
       done++;
