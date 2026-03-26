@@ -9,7 +9,13 @@ import { useHighlightedElement } from "@/contexts/HighlightContext";
 import { useAiEvent } from "@/contexts/AiEventContext";
 
 interface AspectScore { aspectCode: string; score: number | null; }
-interface DeepDive { aspectCode: string; resourcesText: string | null; }
+interface DeepDive {
+  aspectCode: string;
+  resultsText: string | null;
+  resourcesText: string | null;
+  challengesText: string | null;
+  indicatorsText: string | null;
+}
 interface Session {
   id: string;
   scores: AspectScore[];
@@ -22,13 +28,25 @@ interface Session {
   } | null;
 }
 
+function getScoreColor(score: number): string {
+  if (score >= 8) return "#22c55e";
+  if (score >= 5) return "#eab308";
+  return "#ef4444";
+}
+
+const DEEP_FIELDS = [
+  { key: "resultsText", label: "Результаты", icon: "📈", color: "#22c55e" },
+  { key: "resourcesText", label: "Ресурсы", icon: "🔧", color: "#4F46E5" },
+  { key: "challengesText", label: "Вызовы", icon: "⚡", color: "#ef4444" },
+  { key: "indicatorsText", label: "Индикаторы", icon: "🎯", color: "#f59e0b" },
+] as const;
+
 function Stage3Content({ session, userName }: { session: Session; userName: string }) {
   const router = useRouter();
   const [focusAspects, setFocusAspects] = useState<string[]>(
     session.focusPlan ? JSON.parse(session.focusPlan.focusAspects) || [] : []
   );
   const [targetResult, setTargetResult] = useState(session.focusPlan?.targetResult ?? "");
-  const [crossResources, setCrossResources] = useState(session.focusPlan?.crossResourcesText ?? "");
   const [firstSteps, setFirstSteps] = useState(session.focusPlan?.firstStepsText ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -54,6 +72,8 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
   }
 
   function getScore(code: string) { return session.scores.find((s) => s.aspectCode === code); }
+  function getDeepDive(code: string) { return session.deepDives.find((dd) => dd.aspectCode === code); }
+  const deepDiveCodes = session.deepDives.map((dd) => dd.aspectCode);
 
   async function save(andFinish = false) {
     setSaving(true);
@@ -66,7 +86,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
           sessionId: session.id,
           focusAspects,
           targetResult: targetResult || null,
-          crossResourcesText: crossResources || null,
+          crossResourcesText: null,
           firstStepsText: firstSteps || null,
         }),
       });
@@ -79,7 +99,6 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
   }
 
   const isValid = focusAspects.length > 0 && targetResult.trim() && firstSteps.trim();
-  const deepDiveCodes = session.deepDives.map((dd) => dd.aspectCode);
 
   return (
     <div className="p-6">
@@ -98,19 +117,27 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
         <p className="text-xs" style={{ color: "var(--muted)" }}>Выберите 1–2 аспекта и сформулируйте конкретные шаги на 2 месяца.</p>
       </div>
 
-      {/* Focus selector */}
+      {/* ── Шаг 1: выбор фокуса ─────────────────────────────────────── */}
       <div
         id="focus-selector"
         className={`p-5 rounded-2xl mb-4 transition-all ${focusH ? "ai-highlighted" : ""}`}
         style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
       >
-        <div className="text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
-          Фокусные аспекты <span className="text-xs font-normal" style={{ color: "var(--muted)" }}>не более 2</span>
+        <div className="flex items-center justify-between mb-1">
+          <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
+            Шаг 1 — Выберите фокусные аспекты
+          </div>
+          <div className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--surface-2)", color: "var(--muted)" }}>
+            {focusAspects.length}/2 выбрано
+          </div>
         </div>
-        <p className="text-xs mb-3" style={{ color: "var(--muted)" }}>Рекомендуем выбирать из углублённых</p>
+        <p className="text-xs mb-3" style={{ color: "var(--muted)" }}>Рекомендуем выбирать из углублённых на этапе 2</p>
+
         <div className="grid grid-cols-3 gap-2">
           {ASPECTS.map((asp) => {
             const sc = getScore(asp.code);
+            const scoreNum = sc?.score ?? null;
+            const scoreColor = scoreNum !== null ? getScoreColor(scoreNum) : "var(--muted)";
             const isDived = deepDiveCodes.includes(asp.code);
             const isFocus = focusAspects.includes(asp.code);
             const isDisabled = !isFocus && focusAspects.length >= 2;
@@ -119,100 +146,126 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
                 key={asp.code}
                 onClick={() => !isDisabled && toggleFocus(asp.code)}
                 disabled={isDisabled}
-                className="p-2.5 rounded-xl text-left transition-all text-xs"
+                className="p-2.5 rounded-xl text-left transition-all"
                 style={{
-                  background: isFocus ? asp.color + "25" : isDived ? "var(--surface-2)" : "transparent",
-                  border: isFocus ? `2px solid ${asp.color}` : `1px solid ${isDived ? asp.color + "40" : "var(--border)"}`,
-                  color: isFocus ? asp.color : "var(--muted)",
-                  opacity: isDisabled ? 0.4 : 1,
+                  background: isFocus ? "#4F46E510" : isDived ? "var(--surface-2)" : "transparent",
+                  border: isFocus ? "2px solid #4F46E5" : `1px solid ${isDived ? "#4F46E530" : "var(--border)"}`,
+                  opacity: isDisabled ? 0.35 : 1,
                   cursor: isDisabled ? "not-allowed" : "pointer",
                 }}
               >
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="font-semibold text-xs truncate" style={{ color: isFocus ? asp.color : "var(--foreground)" }}>{asp.shortTitle}</span>
-                  <span className="text-xs ml-1 flex-shrink-0" style={{ color: asp.color }}>{sc?.score ?? "—"}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold truncate" style={{ color: isFocus ? "#4F46E5" : "var(--foreground)" }}>
+                    {asp.shortTitle}
+                  </span>
+                  <span className="text-xs font-bold ml-1 flex-shrink-0" style={{ color: scoreColor }}>
+                    {scoreNum ?? "—"}
+                  </span>
                 </div>
-                {isFocus && <div className="text-xs font-medium">✓ выбран</div>}
-                {isDived && !isFocus && <div className="text-xs" style={{ color: asp.color + "90" }}>углублён</div>}
+                <div className="mt-0.5 text-xs" style={{ color: "var(--muted)", fontSize: 10 }}>
+                  {isFocus ? <span style={{ color: "#4F46E5" }}>✓ выбран</span>
+                    : isDived ? <span style={{ color: "#4F46E580" }}>углублён</span>
+                    : null}
+                </div>
               </button>
             );
           })}
         </div>
+
+        {/* Контекст из этапа 2 для выбранных аспектов */}
+        {focusAspects.length > 0 && (
+          <div className="mt-4 flex flex-col gap-3">
+            {focusAspects.map((code) => {
+              const asp = ASPECTS.find((a) => a.code === code);
+              const dd = getDeepDive(code);
+              if (!asp) return null;
+              const filledFields = DEEP_FIELDS.filter((f) => dd?.[f.key]?.trim());
+              return (
+                <div key={code} className="rounded-xl p-3"
+                  style={{ background: "#4F46E508", border: "1px solid #4F46E520" }}>
+                  <div className="text-xs font-semibold mb-2" style={{ color: "#4F46E5" }}>
+                    {asp.shortTitle} — данные из этапа 2
+                  </div>
+                  {filledFields.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {filledFields.map((f) => (
+                        <div key={f.key} className="rounded-lg px-2 py-1 flex items-start gap-1.5"
+                          style={{ background: f.color + "12", border: `1px solid ${f.color}25` }}>
+                          <span style={{ fontSize: 12 }}>{f.icon}</span>
+                          <span className="text-xs" style={{ color: "var(--foreground)" }}>
+                            {(dd?.[f.key] ?? "").length > 70
+                              ? (dd?.[f.key] ?? "").slice(0, 70) + "…"
+                              : dd?.[f.key]}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs" style={{ color: "var(--muted)" }}>Этап 2 не заполнен по этому аспекту</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Target result */}
-      <div
-        id="target-result-field"
-        className={`p-5 rounded-2xl mb-3 transition-all ${targetH ? "ai-highlighted" : ""}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
-        onClick={onTargetInteract}
-      >
-        <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
-          Желаемый результат за 2 месяца <span className="text-xs font-normal" style={{ color: "#ef4444" }}>обязательно</span>
-        </label>
-        <p className="text-xs mb-2" style={{ color: "var(--muted)" }}>Конкретно и измеримо</p>
-        <textarea
-          value={targetResult}
-          onChange={(e) => setTargetResult(e.target.value)}
-          onBlur={(e) => { if (e.target.value.trim()) sendEvent(`[СОБЫТИЕ: Пользователь сформулировал желаемый результат: «${e.target.value.trim()}»]`); }}
-          placeholder="Например: К маю провести 3 встречи с партнёрами и оформить одно соглашение"
-          rows={2}
-          className="w-full text-sm resize-none leading-relaxed"
-          style={{ background: "transparent", border: "none", color: "var(--foreground)" }}
-        />
-      </div>
-
-      {/* Cross resources */}
-      {session.deepDives.filter(dd => !focusAspects.includes(dd.aspectCode) && dd.resourcesText).length > 0 && (
-        <div className="p-4 rounded-xl mb-3" style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-          <div className="text-xs font-medium mb-2" style={{ color: "var(--muted)" }}>Ресурсы из других аспектов:</div>
-          {session.deepDives.filter(dd => !focusAspects.includes(dd.aspectCode) && dd.resourcesText).map(dd => {
-            const asp = ASPECTS.find(a => a.code === dd.aspectCode);
-            return (
-              <div key={dd.aspectCode} className="text-xs mb-1" style={{ color: "var(--muted)" }}>
-                <span style={{ color: asp?.color }}>{asp?.shortTitle}:</span> {dd.resourcesText}
-              </div>
-            );
-          })}
+      {/* ── Шаг 2: стратегическая карточка ──────────────────────────── */}
+      <div className="rounded-2xl mb-5 overflow-hidden"
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
+        <div className="px-5 pt-4 pb-3" style={{ borderBottom: "1px solid var(--border)" }}>
+          <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Шаг 2 — Стратегия на 2 месяца</div>
         </div>
-      )}
 
-      <div className="p-5 rounded-2xl mb-3" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
-        <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
-          Ресурсы других аспектов <span className="text-xs font-normal" style={{ color: "var(--muted)" }}>рекомендуется</span>
-        </label>
-        <textarea
-          value={crossResources}
-          onChange={(e) => setCrossResources(e.target.value)}
-          placeholder="Как ресурсы других аспектов помогут достичь фокуса..."
-          rows={2}
-          className="w-full text-sm resize-none leading-relaxed"
-          style={{ background: "transparent", border: "none", color: "var(--foreground)" }}
-        />
+        {/* Желаемый результат */}
+        <div
+          id="target-result-field"
+          className={`px-5 py-4 transition-all ${targetH ? "ai-highlighted" : ""}`}
+          style={{ borderBottom: "1px solid var(--border)" }}
+          onClick={onTargetInteract}
+        >
+          <label className="flex items-center gap-2 text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
+            <span>🎯</span>
+            <span>Желаемый результат</span>
+            <span className="text-xs font-normal" style={{ color: "#ef4444" }}>обязательно</span>
+          </label>
+          <p className="text-xs mb-2" style={{ color: "var(--muted)" }}>Конкретно и измеримо — что изменится за 2 месяца?</p>
+          <textarea
+            value={targetResult}
+            onChange={(e) => setTargetResult(e.target.value)}
+            onBlur={(e) => { if (e.target.value.trim()) sendEvent(`[СОБЫТИЕ: Пользователь сформулировал желаемый результат: «${e.target.value.trim()}»]`); }}
+            placeholder="Например: К маю провести 3 встречи с партнёрами и оформить одно соглашение"
+            rows={2}
+            className="w-full text-sm resize-none leading-relaxed"
+            style={{ background: "transparent", border: "none", color: "var(--foreground)" }}
+          />
+        </div>
+
+        {/* Первые шаги */}
+        <div
+          id="first-steps-field"
+          className={`px-5 py-4 transition-all ${firstStepsH ? "ai-highlighted" : ""}`}
+          onClick={onFirstStepsInteract}
+        >
+          <label className="flex items-center gap-2 text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
+            <span>📋</span>
+            <span>Первые шаги на этой неделе</span>
+            <span className="text-xs font-normal" style={{ color: "#ef4444" }}>обязательно</span>
+          </label>
+          <p className="text-xs mb-2" style={{ color: "var(--muted)" }}>Конкретные действия, которые можно начать прямо сейчас</p>
+          <textarea
+            value={firstSteps}
+            onChange={(e) => setFirstSteps(e.target.value)}
+            onBlur={(e) => { if (e.target.value.trim()) sendEvent(`[СОБЫТИЕ: Пользователь описал первые шаги на неделю: «${e.target.value.trim()}»]`); }}
+            placeholder="1. Составить список... 2. Написать письмо..."
+            rows={3}
+            className="w-full text-sm resize-none leading-relaxed"
+            style={{ background: "transparent", border: "none", color: "var(--foreground)" }}
+          />
+        </div>
       </div>
 
-      {/* First steps */}
-      <div
-        id="first-steps-field"
-        className={`p-5 rounded-2xl mb-5 transition-all ${firstStepsH ? "ai-highlighted" : ""}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
-        onClick={onFirstStepsInteract}
-      >
-        <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
-          Первые шаги на этой неделе <span className="text-xs font-normal" style={{ color: "#ef4444" }}>обязательно</span>
-        </label>
-        <p className="text-xs mb-2" style={{ color: "var(--muted)" }}>Конкретные действия, которые можно начать прямо сейчас</p>
-        <textarea
-          value={firstSteps}
-          onChange={(e) => setFirstSteps(e.target.value)}
-          onBlur={(e) => { if (e.target.value.trim()) sendEvent(`[СОБЫТИЕ: Пользователь описал первые шаги на неделю: «${e.target.value.trim()}»]`); }}
-          placeholder="1. Составить список... 2. Написать письмо..."
-          rows={3}
-          className="w-full text-sm resize-none leading-relaxed"
-          style={{ background: "transparent", border: "none", color: "var(--foreground)" }}
-        />
-      </div>
-
+      {/* ── Кнопки ───────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
         <button
           id="save-button"
