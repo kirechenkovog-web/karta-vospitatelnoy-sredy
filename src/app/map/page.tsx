@@ -247,9 +247,9 @@ function InlineAspectView({
             </span>
           )}
         </div>
-        <div className="flex gap-2 flex-wrap" onClick={onScoreInteract}>
-          {Array.from({ length: 11 }, (_, i) => i).map((n) => {
-            const c = getScoreColor(n || 1);
+        <div className="flex gap-2" onClick={onScoreInteract}>
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
+            const c = getScoreColor(n);
             return (
               <button
                 key={n}
