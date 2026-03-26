@@ -85,7 +85,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#3b82f6" }}>КВС</div>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#4F46E5" }}>КВС</div>
           <StageNav currentStage={3} canGoStage2={true} canGoStage3={true} />
         </div>
         <div className="text-sm px-3 py-1 rounded-full" style={{ background: "var(--surface)", color: "var(--foreground)", border: "1px solid var(--border)" }}>
@@ -102,7 +102,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
       <div
         id="focus-selector"
         className={`p-5 rounded-2xl mb-4 transition-all ${focusH ? "ai-highlighted" : ""}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
       >
         <div className="text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
           Фокусные аспекты <span className="text-xs font-normal" style={{ color: "var(--muted)" }}>не более 2</span>
@@ -144,7 +144,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
       <div
         id="target-result-field"
         className={`p-5 rounded-2xl mb-3 transition-all ${targetH ? "ai-highlighted" : ""}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
         onClick={onTargetInteract}
       >
         <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
@@ -177,7 +177,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
         </div>
       )}
 
-      <div className="p-5 rounded-2xl mb-3" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+      <div className="p-5 rounded-2xl mb-3" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
         <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
           Ресурсы других аспектов <span className="text-xs font-normal" style={{ color: "var(--muted)" }}>рекомендуется</span>
         </label>
@@ -195,7 +195,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
       <div
         id="first-steps-field"
         className={`p-5 rounded-2xl mb-5 transition-all ${firstStepsH ? "ai-highlighted" : ""}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
         onClick={onFirstStepsInteract}
       >
         <label className="block text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
@@ -219,7 +219,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
           onClick={() => save(true)}
           disabled={!isValid || saving}
           className={`px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-40 text-white ${saveH ? "ai-highlighted" : ""}`}
-          style={{ background: "#3b82f6" }}
+          style={{ background: "#4F46E5" }}
         >
           {saving ? "Сохраняю..." : "Завершить и посмотреть результаты →"}
         </button>

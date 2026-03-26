@@ -31,7 +31,7 @@ interface Session {
 
 const FIELDS = [
   { key: "resultsText", id: "results-field", label: "Результаты", desc: "Что уже достигнуто", color: "#22c55e" },
-  { key: "resourcesText", id: "resources-field", label: "Ресурсы", desc: "Что есть в наличии", color: "#3b82f6" },
+  { key: "resourcesText", id: "resources-field", label: "Ресурсы", desc: "Что есть в наличии", color: "#4F46E5" },
   { key: "challengesText", id: "challenges-field", label: "Вызовы", desc: "Что создаёт трудности", color: "#ef4444" },
   { key: "indicatorsText", id: "indicators-field", label: "Индикаторы", desc: "Как понять, что стало лучше", color: "#f59e0b" },
 ];
@@ -105,7 +105,7 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
     <div className="p-6">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#3b82f6" }}>КВС</div>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#4F46E5" }}>КВС</div>
           <StageNav currentStage={2} canGoStage2={true} canGoStage3={canGoStage3} />
         </div>
         <div className="flex items-center gap-3">

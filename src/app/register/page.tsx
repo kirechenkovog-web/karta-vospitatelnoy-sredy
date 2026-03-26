@@ -46,7 +46,7 @@ export default function RegisterPage() {
           <button
             onClick={() => router.push("/login")}
             className="w-full py-3 rounded-xl text-sm font-semibold text-white"
-            style={{ background: "#3b82f6" }}
+            style={{ background: "#4F46E5" }}
           >
             Перейти ко входу
           </button>
@@ -59,7 +59,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "var(--background)" }}>
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "#3b82f620", color: "#3b82f6", fontSize: 24 }}>✦</div>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "#4F46E520", color: "#4F46E5", fontSize: 24 }}>✦</div>
           <h1 className="text-xl font-bold mb-1" style={{ color: "var(--foreground)" }}>Регистрация</h1>
           <p className="text-sm" style={{ color: "var(--muted)" }}>Пароль придёт на указанный email</p>
         </div>
@@ -89,7 +89,7 @@ export default function RegisterPage() {
             type="submit"
             disabled={status === "loading"}
             className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 mt-1"
-            style={{ background: "#3b82f6" }}
+            style={{ background: "#4F46E5" }}
           >
             {status === "loading" ? "Отправляем..." : "Зарегистрироваться"}
           </button>
@@ -97,7 +97,7 @@ export default function RegisterPage() {
 
         <p className="mt-4 text-sm text-center" style={{ color: "var(--muted)" }}>
           Уже есть аккаунт?{" "}
-          <Link href="/login" style={{ color: "#3b82f6" }}>Войти</Link>
+          <Link href="/login" style={{ color: "#4F46E5" }}>Войти</Link>
         </p>
       </div>
     </div>

@@ -38,15 +38,15 @@ export default function StageNav({ currentStage, canGoStage2, canGoStage3 }: Sta
                 isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
               style={{
-                background: isActive ? "#3b82f620" : "transparent",
-                color: isActive ? "#3b82f6" : "var(--muted)",
-                border: isActive ? "1px solid #3b82f640" : "1px solid transparent",
+                background: isActive ? "#4F46E520" : "transparent",
+                color: isActive ? "#4F46E5" : "var(--muted)",
+                border: isActive ? "1px solid #4F46E540" : "1px solid transparent",
               }}
             >
               <span
                 className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
                 style={{
-                  background: isActive ? "#3b82f6" : "var(--surface-2)",
+                  background: isActive ? "#4F46E5" : "var(--surface-2)",
                   color: isActive ? "#fff" : "var(--muted)",
                 }}
               >

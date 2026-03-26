@@ -220,14 +220,14 @@ export default function AiSidebar({
 
       {collapsed ? (
         <div className="flex flex-col items-center pt-14 gap-3">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#3b82f620", color: "#3b82f6" }}>✦</div>
-          {loading && <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#3b82f6" }} />}
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#4F46E520", color: "#4F46E5" }}>✦</div>
+          {loading && <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#4F46E5" }} />}
         </div>
       ) : (
         <>
           {/* Header */}
           <div className="px-4 py-3 flex items-center gap-2 flex-shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#3b82f620", color: "#3b82f6" }}>✦</div>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#4F46E520", color: "#4F46E5" }}>✦</div>
             <div className="min-w-0 flex-1">
               <div className="font-semibold truncate" style={{ color: "var(--foreground)", fontSize: 14 }}>AI-наставник</div>
               <div className="truncate" style={{ color: "var(--muted)", fontSize: 12 }}>{loading ? "Думает..." : "Готов помочь"}</div>
@@ -256,12 +256,12 @@ export default function AiSidebar({
               return (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   {msg.role === "assistant" && (
-                    <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 mr-2 mt-0.5" style={{ background: "#3b82f620", color: "#3b82f6", fontSize: 12 }}>✦</div>
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 mr-2 mt-0.5" style={{ background: "#4F46E520", color: "#4F46E5", fontSize: 12 }}>✦</div>
                   )}
                   <div
                     className="px-3 py-2.5 leading-relaxed ai-message-bubble"
                     style={{
-                      background: msg.role === "user" ? "#3b82f6" : "var(--surface-2)",
+                      background: msg.role === "user" ? "#4F46E5" : "var(--surface-2)",
                       color: msg.role === "user" ? "#fff" : "var(--foreground)",
                       maxWidth: "85%",
                       fontSize: 14,
@@ -290,11 +290,11 @@ export default function AiSidebar({
 
             {loading && (
               <div className="flex justify-start">
-                <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 mr-2" style={{ background: "#3b82f620", color: "#3b82f6", fontSize: 12 }}>✦</div>
+                <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 mr-2" style={{ background: "#4F46E520", color: "#4F46E5", fontSize: 12 }}>✦</div>
                 <div className="px-3 py-2 rounded-xl flex items-center gap-1.5" style={{ background: "var(--surface-2)", fontSize: 16 }}>
-                  <span className="animate-pulse" style={{ color: "#3b82f6" }}>●</span>
-                  <span className="animate-pulse" style={{ color: "#3b82f6", animationDelay: "0.2s" }}>●</span>
-                  <span className="animate-pulse" style={{ color: "#3b82f6", animationDelay: "0.4s" }}>●</span>
+                  <span className="animate-pulse" style={{ color: "#4F46E5" }}>●</span>
+                  <span className="animate-pulse" style={{ color: "#4F46E5", animationDelay: "0.2s" }}>●</span>
+                  <span className="animate-pulse" style={{ color: "#4F46E5", animationDelay: "0.4s" }}>●</span>
                 </div>
               </div>
             )}
@@ -318,7 +318,7 @@ export default function AiSidebar({
                 onClick={handleSend}
                 disabled={!input.trim() || loading}
                 className="w-9 h-9 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-40 text-white flex-shrink-0"
-                style={{ background: "#3b82f6", border: "none", cursor: "pointer", fontSize: 16 }}
+                style={{ background: "#4F46E5", border: "none", cursor: "pointer", fontSize: 16 }}
               >
                 ↑
               </button>

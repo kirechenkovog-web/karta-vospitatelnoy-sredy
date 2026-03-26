@@ -42,7 +42,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "var(--background)" }}>
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "#3b82f620", color: "#3b82f6", fontSize: 24 }}>✦</div>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "#4F46E520", color: "#4F46E5", fontSize: 24 }}>✦</div>
           <h1 className="text-xl font-bold mb-1" style={{ color: "var(--foreground)" }}>Вход в систему</h1>
           <p className="text-sm" style={{ color: "var(--muted)" }}>Карта воспитательной среды</p>
         </div>
@@ -85,19 +85,19 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 mt-1"
-            style={{ background: "#3b82f6" }}
+            style={{ background: "#4F46E5" }}
           >
             {loading ? "Входим..." : "Войти"}
           </button>
         </form>
 
         <div className="mt-4 flex flex-col gap-2 text-center">
-          <Link href="/reset-password" className="text-sm" style={{ color: "#3b82f6" }}>
+          <Link href="/reset-password" className="text-sm" style={{ color: "#4F46E5" }}>
             Забыли пароль?
           </Link>
           <p className="text-sm" style={{ color: "var(--muted)" }}>
             Нет аккаунта?{" "}
-            <Link href="/register" style={{ color: "#3b82f6" }}>
+            <Link href="/register" style={{ color: "#4F46E5" }}>
               Зарегистрироваться
             </Link>
           </p>

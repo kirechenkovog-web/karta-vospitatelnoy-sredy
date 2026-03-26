@@ -131,7 +131,7 @@ function AspectContent({
       <div
         id="score-selector"
         className={`p-5 rounded-2xl mb-4 transition-all ${scoreSelectorH ? "ai-highlighted" : ""}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
       >
         <div className="text-sm font-medium mb-3" style={{ color: "var(--foreground)" }}>
           Ваша оценка
@@ -171,7 +171,7 @@ function AspectContent({
       <div
         id="ten-of-ten-field"
         className={`p-5 rounded-2xl mb-3 transition-all ${tenOfTenH ? "ai-highlighted" : ""}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
         onClick={onTenInteract}
       >
         <label className="block text-sm font-medium mb-2" style={{ color: "var(--foreground)" }}>
@@ -196,7 +196,7 @@ function AspectContent({
       <div
         id="current-state-field"
         className={`p-5 rounded-2xl mb-5 transition-all ${currentStateH ? "ai-highlighted" : ""}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
         onClick={onCurrentStateInteract}
       >
         <label className="block text-sm font-medium mb-2" style={{ color: "var(--foreground)" }}>

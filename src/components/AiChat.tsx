@@ -84,7 +84,7 @@ export default function AiChat({ sessionId, stage, aspectCode, initialMessage }:
             <div className="flex items-center gap-2">
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
-                style={{ background: "#3b82f620" }}
+                style={{ background: "#4F46E520" }}
               >
                 🤖
               </div>
@@ -118,7 +118,7 @@ export default function AiChat({ sessionId, stage, aspectCode, initialMessage }:
                 <div
                   className="px-3 py-2 rounded-xl text-sm leading-relaxed max-w-[85%]"
                   style={{
-                    background: msg.role === "user" ? "#3b82f6" : "var(--surface-2)",
+                    background: msg.role === "user" ? "#4F46E5" : "var(--surface-2)",
                     color: msg.role === "user" ? "#fff" : "var(--foreground)",
                   }}
                 >
@@ -161,7 +161,7 @@ export default function AiChat({ sessionId, stage, aspectCode, initialMessage }:
               onClick={sendMessage}
               disabled={!input.trim() || loading}
               className="w-9 h-9 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-40 text-white"
-              style={{ background: "#3b82f6" }}
+              style={{ background: "#4F46E5" }}
             >
               ↑
             </button>
@@ -173,7 +173,7 @@ export default function AiChat({ sessionId, stage, aspectCode, initialMessage }:
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-lg transition-transform hover:scale-105 active:scale-95 text-white"
-        style={{ background: open ? "#1d4ed8" : "#3b82f6" }}
+        style={{ background: open ? "#1d4ed8" : "#4F46E5" }}
         title="AI-наставник"
       >
         {open ? "×" : "✦"}

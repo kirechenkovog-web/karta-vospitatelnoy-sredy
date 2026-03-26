@@ -299,12 +299,13 @@ function AspectCard({ aspect, score, isCompleted }: {
       <div
         id={`aspect-card-${aspect.code}`}
         onClick={onInteract}
-        className={`relative cursor-pointer rounded-2xl overflow-hidden transition-all duration-200 hover:scale-[1.03] active:scale-[0.97] ${isHighlighted ? "ai-highlighted" : ""}`}
+        className={`relative cursor-pointer rounded-2xl overflow-hidden transition-all duration-200 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.97] ${isHighlighted ? "ai-highlighted" : ""}`}
         style={{
-          background: isCompleted ? aspect.color + "14" : "var(--surface)",
-          border: `${isCompleted ? "2px" : "1px"} solid ${isCompleted ? aspect.color + "55" : "var(--border)"}`,
+          background: isCompleted ? aspect.color + "12" : "var(--surface)",
+          border: `1px solid ${isCompleted ? aspect.color + "40" : "var(--border)"}`,
+          boxShadow: isCompleted ? `0 4px 20px ${aspect.color}20` : "var(--card-shadow)",
           minHeight: 190,
-          opacity: isCompleted ? 1 : 0.72,
+          opacity: isCompleted ? 1 : 0.75,
         }}
       >
         {/* top color line */}
@@ -358,7 +359,7 @@ function MapContent({ session, userName }: { session: Session; userName: string 
     <>
       <header className="px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#3b82f6" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#4F46E5" }}>
             КВС
           </div>
           <StageNav currentStage={1} canGoStage2={canGoStage2} canGoStage3={canGoStage3} />
@@ -394,7 +395,7 @@ function MapContent({ session, userName }: { session: Session; userName: string 
         <div className="mb-5 h-1 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
           <div
             className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${(completedCount / 12) * 100}%`, background: "#3b82f6" }}
+            style={{ width: `${(completedCount / 12) * 100}%`, background: "#4F46E5" }}
           />
         </div>
 

@@ -83,7 +83,7 @@ export default function ResultPage() {
         style={{ borderBottom: "1px solid var(--border)" }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ background: "#3b82f6" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white" style={{ background: "#4F46E5" }}>
             КВС
           </div>
           <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Карта воспитательной среды</span>
@@ -103,7 +103,7 @@ export default function ResultPage() {
           className="p-8 rounded-3xl mb-8 text-center"
           style={{
             background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-            border: "1px solid #3b82f640",
+            border: "1px solid #4F46E540",
           }}
         >
           <div className="text-4xl mb-3">✦</div>
@@ -259,9 +259,9 @@ export default function ResultPage() {
             {session.focusPlan.firstStepsText && (
               <div
                 className="p-4 rounded-xl"
-                style={{ background: "#3b82f615", border: "1px solid #3b82f630" }}
+                style={{ background: "#4F46E515", border: "1px solid #4F46E530" }}
               >
-                <div className="text-xs font-medium mb-2" style={{ color: "#3b82f6" }}>
+                <div className="text-xs font-medium mb-2" style={{ color: "#4F46E5" }}>
                   Первые шаги на этой неделе
                 </div>
                 <div className="text-sm leading-relaxed" style={{ color: "var(--foreground)" }}>
