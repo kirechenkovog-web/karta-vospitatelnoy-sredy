@@ -7,7 +7,6 @@ import { ASPECTS } from "@/data/aspects";
 import AppShell from "@/components/AppShell";
 import StageNav from "@/components/StageNav";
 import { useHighlightedElement } from "@/contexts/HighlightContext";
-import { useTheme } from "@/contexts/ThemeContext";
 
 interface AspectScore {
   aspectCode: string;
@@ -24,20 +23,18 @@ interface Session {
 
 // ─── Illustrations ────────────────────────────────────────────────────────────
 
-function Illus({ code, active, isLight }: { code: string; active: boolean; isLight: boolean }) {
-  const theme = isLight ? "light" : "dark";
+function Illus({ code, active }: { code: string; active: boolean }) {
   return (
     <img
-      src={`/illustrations/${code}-${theme}.png`}
+      src={`/illustrations/${code}.png`}
       alt=""
       style={{
         width: "100%",
         height: "100%",
         objectFit: "contain",
-        opacity: active ? 1 : 0.4,
-        filter: active ? "none" : "grayscale(0.6)",
+        opacity: active ? 1 : 0.35,
+        filter: active ? "none" : "grayscale(0.7)",
         transition: "opacity 0.2s, filter 0.2s",
-        borderRadius: 6,
       }}
     />
   );
@@ -51,7 +48,6 @@ function AspectCard({ aspect, score, isCompleted }: {
   isCompleted: boolean;
 }) {
   const { isHighlighted, onInteract } = useHighlightedElement(`aspect-card-${aspect.code}`);
-  const { theme } = useTheme();
 
   return (
     <Link href={`/map/${aspect.code}`}>
@@ -82,7 +78,7 @@ function AspectCard({ aspect, score, isCompleted }: {
 
         {/* illustration */}
         <div className="px-4 pt-5 pb-1" style={{ height: 148 }}>
-          <Illus code={aspect.code} active={isCompleted} isLight={theme === "light"} />
+          <Illus code={aspect.code} active={isCompleted} />
         </div>
 
         {/* label */}
