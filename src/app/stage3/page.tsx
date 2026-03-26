@@ -72,7 +72,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-      if (andFinish) router.push("/result");
+      if (andFinish) router.push(`/result?sid=${session.id}`);
     } finally {
       setSaving(false);
     }

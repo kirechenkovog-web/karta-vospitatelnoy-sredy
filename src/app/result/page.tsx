@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ASPECTS } from "@/data/aspects";
 
@@ -37,19 +37,34 @@ interface Session {
 
 export default function ResultPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    const sid = localStorage.getItem("sessionId");
-    if (!sid) { router.push("/"); return; }
+    const sidFromUrl = searchParams.get("sid");
 
-    fetch(`/api/session?sessionId=${sid}`)
+    const load = (sid: string) =>
+      fetch(`/api/session?sessionId=${sid}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.error) { router.push("/login"); return; }
+          setSession(data);
+        });
+
+    if (sidFromUrl) {
+      load(sidFromUrl);
+      return;
+    }
+
+    // Fallback: get session from auth cookie
+    fetch("/api/session", { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) { router.push("/"); return; }
-        setSession(data);
-      });
-  }, [router]);
+        if (data.error) { router.push("/login"); return; }
+        load(data.session.id);
+      })
+      .catch(() => router.push("/login"));
+  }, [router, searchParams]);
 
   if (!session) {
     return (
