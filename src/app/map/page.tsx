@@ -405,11 +405,14 @@ export default function MapPage() {
   openAspectRef.current = openAspect;
 
   useEffect(() => {
-    fetch("/api/session", { method: "POST" })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) { router.push("/login"); return; }
-        return fetch(`/api/session?sessionId=${data.session.id}`)
+    Promise.all([
+      fetch("/api/onboarding").then((r) => r.json()),
+      fetch("/api/session", { method: "POST" }).then((r) => r.json()),
+    ])
+      .then(([onb, sessionData]) => {
+        if (!onb.onboardingDone) { router.push("/onboarding"); return; }
+        if (sessionData.error) { router.push("/login"); return; }
+        return fetch(`/api/session?sessionId=${sessionData.session.id}`)
           .then((r) => r.json())
           .then((full) => {
             if (full.error) { router.push("/login"); return; }

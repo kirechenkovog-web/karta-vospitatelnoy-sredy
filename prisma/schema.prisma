@@ -7,11 +7,12 @@ datasource db {
 }
 
 model User {
-  id           String              @id @default(cuid())
-  email        String              @unique
-  passwordHash String
-  createdAt    DateTime            @default(now())
-  sessions     AssessmentSession[]
+  id             String              @id @default(cuid())
+  email          String              @unique
+  passwordHash   String
+  onboardingDone Boolean             @default(false)
+  createdAt      DateTime            @default(now())
+  sessions       AssessmentSession[]
 }
 
 model AssessmentSession {

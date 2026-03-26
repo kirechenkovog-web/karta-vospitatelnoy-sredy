@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/olegkirechenkov/.claude/**)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -X POST \"https://mcp.fal.ai/mcp\" -H \"Authorization: Bearer 151f820f-83c2-4c86-a6ec-bd23009e6fb0:5beaf1cd26ca437dd5444b119793a51f\" -H \"Content-Type: application/json\" -d '{\"\"\"\"jsonrpc\"\"\"\":\"\"\"\"2.0\"\"\"\",\"\"\"\"id\"\"\"\":1,\"\"\"\"method\"\"\"\":\"\"\"\"tools/list\"\"\"\",\"\"\"\"params\"\"\"\":{}}' --max-time 10)",
+      "Bash(curl -s -X POST \"https://mcp.fal.ai/mcp\" -H \"Authorization: Bearer 151f820f-83c2-4c86-a6ec-bd23009e6fb0:5beaf1cd26ca437dd5444b119793a51f\" -H \"Content-Type: application/json\" -H \"Accept: application/json, text/event-stream\" -d '{\"\"\"\"jsonrpc\"\"\"\":\"\"\"\"2.0\"\"\"\",\"\"\"\"id\"\"\"\":1,\"\"\"\"method\"\"\"\":\"\"\"\"tools/list\"\"\"\",\"\"\"\"params\"\"\"\":{}}' --max-time 10)"
+    ],
+    "additionalDirectories": [
+      "/Users/olegkirechenkov/.claude"
+    ]
+  }
+}
