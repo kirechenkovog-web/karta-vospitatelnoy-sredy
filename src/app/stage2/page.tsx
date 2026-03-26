@@ -36,6 +36,12 @@ const FIELDS = [
   { key: "indicatorsText", id: "indicators-field", label: "Индикаторы", desc: "Как понять, что стало лучше", color: "#f59e0b" },
 ];
 
+function getScoreColor(score: number): string {
+  if (score >= 8) return "#22c55e";
+  if (score >= 5) return "#eab308";
+  return "#ef4444";
+}
+
 function Stage2Content({ session, userName }: { session: Session; userName: string }) {
   const router = useRouter();
   const { sendEvent } = useAiEvent();
@@ -137,12 +143,15 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
           const sc = getScore(asp.code);
           const dived = isDeepDived(asp.code);
           const isOpen = openCode === asp.code;
+          const scoreNum = sc?.score ?? null;
+          const scoreColor = scoreNum !== null ? getScoreColor(scoreNum) : "var(--muted)";
+          const filledFields = FIELDS.filter((f) => getDraft(asp.code, f.key)?.trim());
 
           return (
             <div key={asp.code} className="rounded-2xl overflow-hidden"
-              style={{ background: "var(--surface)", border: `1px solid ${dived ? asp.color + "60" : "var(--border)"}` }}>
+              style={{ background: "var(--surface)", border: `1px solid ${dived ? "#4F46E540" : "var(--border)"}` }}>
 
-              {/* Header — always visible */}
+              {/* Header */}
               <button
                 onClick={() => setOpenCode(isOpen ? null : asp.code)}
                 className="w-full flex items-center justify-between px-4 pt-3 pb-2 text-left"
@@ -150,38 +159,36 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
-                    style={{ background: asp.color + "20", color: asp.color }}>
-                    {sc?.score ?? "—"}
+                    style={{ background: scoreColor + "20", color: scoreColor }}>
+                    {scoreNum ?? "—"}
                   </div>
                   <div>
                     <div className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>{asp.shortTitle}</div>
-                    {dived && <div className="text-xs" style={{ color: asp.color }}>✓ Углублён</div>}
+                    {dived && <div className="text-xs" style={{ color: "#4F46E5" }}>✓ Углублён</div>}
                   </div>
                 </div>
                 <div style={{ color: "var(--muted)", fontSize: 12 }}>{isOpen ? "▲" : "▼"}</div>
               </button>
 
-              {/* Summary — always visible when collapsed */}
-              {!isOpen && (
-                <div className="px-4 pb-3 grid grid-cols-2 gap-x-3 gap-y-1">
-                  {FIELDS.map((field) => {
-                    const val = getDraft(asp.code, field.key)?.trim();
+              {/* Summary — filled fields only, as colored chips */}
+              {!isOpen && filledFields.length > 0 && (
+                <div className="px-3 pb-3 flex flex-wrap gap-1.5">
+                  {filledFields.map((field) => {
+                    const val = getDraft(asp.code, field.key)!.trim();
                     return (
-                      <div key={field.key} className="flex gap-1.5 items-start min-w-0">
-                        <span className="w-2 h-2 rounded-full flex-shrink-0 mt-1" style={{ background: field.color }} />
-                        <div className="min-w-0">
-                          <span className="text-xs font-medium" style={{ color: "var(--muted)" }}>{field.label}: </span>
-                          <span className="text-xs" style={{ color: val ? "var(--foreground)" : "var(--muted)", opacity: val ? 1 : 0.5 }}>
-                            {val ? (val.length > 45 ? val.slice(0, 45) + "…" : val) : "не заполнено"}
-                          </span>
-                        </div>
+                      <div key={field.key} className="rounded-lg px-2 py-1 min-w-0 max-w-full"
+                        style={{ background: field.color + "15", border: `1px solid ${field.color}30` }}>
+                        <span className="text-xs font-semibold mr-1" style={{ color: field.color }}>{field.label}:</span>
+                        <span className="text-xs" style={{ color: "var(--foreground)" }}>
+                          {val.length > 60 ? val.slice(0, 60) + "…" : val}
+                        </span>
                       </div>
                     );
                   })}
                 </div>
               )}
 
-              {/* Edit panel — expanded only */}
+              {/* Edit panel */}
               {isOpen && (
                 <div className="px-4 pb-4" style={{ borderTop: "1px solid var(--border)" }}>
                   <div className="pt-3 grid grid-cols-2 gap-3">
@@ -199,7 +206,7 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
                     onClick={() => saveDeepDive(asp.code)}
                     disabled={saving === asp.code}
                     className="mt-3 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 text-white"
-                    style={{ background: asp.color }}
+                    style={{ background: "#4F46E5" }}
                   >
                     {saving === asp.code ? "Сохраняю..." : "Сохранить"}
                   </button>
@@ -208,6 +215,25 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
             </div>
           );
         })}
+      </div>
+
+      {/* Legend */}
+      <div className="mt-4 flex items-center gap-4 flex-wrap px-1">
+        <span className="text-xs" style={{ color: "var(--muted)" }}>Легенда:</span>
+        {FIELDS.map((field) => (
+          <div key={field.key} className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded" style={{ background: field.color + "30", border: `1px solid ${field.color}60` }} />
+            <span className="text-xs font-medium" style={{ color: field.color }}>{field.label}</span>
+          </div>
+        ))}
+        <div className="flex items-center gap-3 ml-2" style={{ borderLeft: "1px solid var(--border)", paddingLeft: 12 }}>
+          {[{ color: "#22c55e", label: "8–10" }, { color: "#eab308", label: "5–7" }, { color: "#ef4444", label: "0–4" }].map((s) => (
+            <div key={s.label} className="flex items-center gap-1">
+              <div className="w-5 h-5 rounded-md text-xs font-bold flex items-center justify-center" style={{ background: s.color + "20", color: s.color }}>7</div>
+              <span className="text-xs" style={{ color: "var(--muted)" }}>{s.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
