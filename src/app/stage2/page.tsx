@@ -173,7 +173,7 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
                   </div>
                   <div>
                     <div className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>{asp.shortTitle}</div>
-                    {dived && <div className="text-xs" style={{ color: "#4F46E5" }}>✓ Углублён</div>}
+                    {dived && <div className="text-xs" style={{ color: "#4F46E5" }}>✓</div>}
                   </div>
                 </div>
                 <div style={{ color: "var(--muted)", fontSize: 12 }}>{isOpen ? "▲" : "▼"}</div>
