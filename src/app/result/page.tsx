@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ASPECTS } from "@/data/aspects";
 
@@ -37,13 +37,13 @@ interface Session {
 
 export default function ResultPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    const sidFromUrl = searchParams.get("sid");
+    // Read URL param directly — avoids useSearchParams() hydration issues
+    const sidFromUrl = new URLSearchParams(window.location.search).get("sid");
 
-    const load = (sid: string) =>
+    const loadById = (sid: string) =>
       fetch(`/api/session?sessionId=${sid}`)
         .then((r) => r.json())
         .then((data) => {
@@ -52,19 +52,19 @@ export default function ResultPage() {
         });
 
     if (sidFromUrl) {
-      load(sidFromUrl);
+      loadById(sidFromUrl);
       return;
     }
 
-    // Fallback: get session from auth cookie
+    // Fallback: find most recent session via auth cookie
     fetch("/api/session", { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
         if (data.error) { router.push("/login"); return; }
-        load(data.session.id);
+        loadById(data.session.id);
       })
       .catch(() => router.push("/login"));
-  }, [router, searchParams]);
+  }, [router]);
 
   if (!session) {
     return (
