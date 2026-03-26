@@ -7,6 +7,8 @@ import AiSidebar from "@/components/AiSidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import UserMenu from "@/components/UserMenu";
 
+interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
+
 interface AppShellProps {
   sessionId: string;
   stage: number;
@@ -15,6 +17,8 @@ interface AppShellProps {
   sessionContext?: string;
   header: ReactNode;
   children: ReactNode;
+  onScoreSuggested?: (score: number) => void;
+  onNotesUpdated?: (notes: NoteItem[]) => void;
 }
 
 export default function AppShell({
@@ -25,6 +29,8 @@ export default function AppShell({
   sessionContext,
   header,
   children,
+  onScoreSuggested,
+  onNotesUpdated,
 }: AppShellProps) {
   return (
     <AiEventProvider>
@@ -48,6 +54,8 @@ export default function AppShell({
               aspectCode={aspectCode}
               autoTrigger={autoTrigger}
               sessionContext={sessionContext}
+              onScoreSuggested={onScoreSuggested}
+              onNotesUpdated={onNotesUpdated}
             />
 
             {/* Main scrollable content */}

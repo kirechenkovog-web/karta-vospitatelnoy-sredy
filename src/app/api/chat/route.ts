@@ -9,6 +9,9 @@ const openai = new OpenAI({
 
 const SYSTEM_PROMPT = `Ты — проактивный наставник советника директора по воспитанию, который сопровождает работу с цифровым инструментом «Карта воспитательной среды».
 
+ВАЖНО О ЗАМЕТКАХ:
+Когда ты добавляешь команды [NOTE:...] в сообщение — они НЕВИДИМЫ пользователю в чате. Они автоматически появляются как структурированные заметки в карточке аспекта. Не говори пользователю «я зафиксировал» или «я добавил в заметки» — просто добавляй команды тихо, продолжая разговор.
+
 КТО ТАКОЙ ПОЛЬЗОВАТЕЛЬ:
 Советник директора по воспитанию — это педагог в школе, который отвечает за воспитательную работу. Он может быть совершенно незнаком с форматом самодиагностики и с самим инструментом. Многие не понимают, зачем нужны оценки, что значат баллы, зачем писать «что для вас 10/10». Твоя задача — объяснять просто и по-человечески, не перегружать терминами, создавать ощущение поддержки, а не экзамена.
 
@@ -19,12 +22,20 @@ const SYSTEM_PROMPT = `Ты — проактивный наставник сов
 - Если пользователь уходит в длинный разговор — поддержи его, но через 1–2 реплики мягко возвращай к структуре: «Это важно — давайте зафиксируем в поле...»
 - Никогда не застревай на одном шаге дольше 3–4 обменов репликами
 
-СТРУКТУРА ЭТАПА 1 (оценка аспекта):
-Шаг 1 — Вспомогательные вопросы: озвучи 2–3 вопроса для размышления по аспекту (они будут переданы тебе в контексте). Поясни, что это вспомогательные вопросы — можно ответить или просто подумать над ними.
-Шаг 2 — Оценка: попроси выставить оценку от 0 до 10. Если оценка поставлена — уточни почему именно такой балл (не больше 1 уточнения).
-Шаг 3 — «Что для вас 10/10?»: предложи заполнить поле — что было бы идеальным состоянием. Помоги сформулировать конкретно.
-Шаг 4 — «Что уже есть сейчас?»: предложи описать текущее состояние. Если написали — похвали и предложи сохранить.
-Шаг 5 — Сохранение: подскажи нажать «Сохранить» или перейти к следующему аспекту.
+СТРУКТУРА ЭТАПА 1 (оценка аспекта) — КОУЧИНГОВЫЕ ФАЗЫ:
+Веди разговор через фазы, не застревая дольше 2–3 реплик на каждой:
+Фаза 1 — Контекст: авто-сообщение уже кратко объясняет суть аспекта. Начни с фазы 2.
+Фаза 2 — Текущее состояние: задай 1–2 конкретных вопроса о том, что есть сейчас. По ответам добавляй [NOTE:bullet:ключевая мысль].
+Фаза 3 — Идеальное состояние: спроси, что было бы идеальным через 2 месяца. Добавляй [NOTE:heading:Идеальное состояние] и [NOTE:bullet:...].
+Фаза 4 — Предложение оценки: на основе разговора скажи «Судя по нашему разговору, я бы предложил оценку X» и добавь [SCORE:X] в конце сообщения.
+Фаза 5 — Завершение: похвали, предложи нажать «Сохранить» и перейти к следующему аспекту.
+
+Правила для заметок:
+- Добавляй 1–3 [NOTE:...] команды в сообщение когда пользователь поделился конкретными фактами или мыслями
+- [NOTE:heading:Текст] — для заголовков разделов (редко, только для структуры)
+- [NOTE:bullet:Текст] — для ключевых мыслей и фактов (основной формат)
+- [NOTE:quote:Текст] — для дословных важных цитат пользователя (коротких)
+- Заметки автоматически появляются в карточке аспекта, не упоминай их явно
 
 СТРУКТУРА ЭТАПА 2 (углублённый анализ аспекта):
 Шаг 1 — Результаты: что уже достигнуто по этому аспекту?
@@ -52,10 +63,8 @@ const SYSTEM_PROMPT = `Ты — проактивный наставник сов
 Длина: не более 3–4 предложений или 3–4 пунктов списка. Один вопрос за раз.
 
 УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ:
-Если ты считаешь, что пользователь готов к следующему действию, добавь в самый конец ответа (после текста, на отдельной строке) одну из команд:
+Если ты считаешь, что пользователь готов к следующему действию, добавь в самый конец ответа (после текста, на отдельной строке) одну ACTION-команду:
 [ACTION:highlight:score-selector] — подсветить выбор оценки
-[ACTION:highlight:ten-of-ten-field] — подсветить поле «что для вас 10/10»
-[ACTION:highlight:current-state-field] — подсветить поле «что уже есть сейчас»
 [ACTION:highlight:save-button] — подсветить кнопку сохранения
 [ACTION:highlight:next-stage-button] — подсветить кнопку перехода к следующему этапу
 [ACTION:highlight:results-field] — подсветить поле результатов (этап 2)
@@ -66,7 +75,13 @@ const SYSTEM_PROMPT = `Ты — проактивный наставник сов
 [ACTION:highlight:target-result-field] — подсветить поле результата (этап 3)
 [ACTION:highlight:first-steps-field] — подсветить поле первых шагов (этап 3)
 
-Используй команды уместно, не в каждом сообщении. Команда должна быть только одна.`;
+Команды оценки и заметок (можно добавлять в любом месте текста):
+[SCORE:7] — предложить оценку 7 (подставится автоматически, пользователь может изменить)
+[NOTE:heading:Текст] — заголовок раздела в заметках аспекта (невидим в чате)
+[NOTE:bullet:Текст] — пункт в заметках аспекта (невидим в чате)
+[NOTE:quote:Текст] — цитата в заметках аспекта (невидима в чате)
+
+Используй ACTION-команды уместно, не в каждом сообщении. ACTION-команда — только одна.`;
 
 function getStagePrompt(stage: number, aspectTitle?: string, isAuto?: boolean, hints?: string[], message?: string): string {
   if (stage === 1 && aspectTitle && message === "Задай наводящие вопросы") {
@@ -112,6 +127,30 @@ function parseAction(reply: string): { text: string; highlightId: string | null 
   return { text: reply, highlightId: null };
 }
 
+// Parse [SCORE:N] from message
+function parseSuggestedScore(text: string): { text: string; suggestedScore: number | null } {
+  const match = text.match(/\[SCORE:(\d+)\]/);
+  if (match) {
+    const score = parseInt(match[1], 10);
+    if (score >= 0 && score <= 10) {
+      return { text: text.replace(/\[SCORE:\d+\]/, "").trim(), suggestedScore: score };
+    }
+  }
+  return { text, suggestedScore: null };
+}
+
+// Parse [NOTE:type:content] from message (multiple)
+interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
+
+function parseNoteItems(text: string): { text: string; noteItems: NoteItem[] } {
+  const noteItems: NoteItem[] = [];
+  const cleaned = text.replace(/\[NOTE:(heading|bullet|quote):([^\]]+)\]/g, (_, type, content) => {
+    noteItems.push({ type: type as NoteItem["type"], text: content.trim() });
+    return "";
+  }).replace(/\n{3,}/g, "\n\n").trim();
+  return { text: cleaned, noteItems };
+}
+
 export async function POST(req: NextRequest) {
   const { sessionId, stage, aspectCode, message, history, isAuto, sessionContext } = await req.json();
 
@@ -146,7 +185,9 @@ export async function POST(req: NextRequest) {
     });
 
     const rawReply = completion.choices[0].message.content ?? "";
-    const { text: reply, highlightId } = parseAction(rawReply);
+    const { text: afterAction, highlightId } = parseAction(rawReply);
+    const { text: afterScore, suggestedScore } = parseSuggestedScore(afterAction);
+    const { text: reply, noteItems } = parseNoteItems(afterScore);
 
     if (sessionId) {
       await prisma.aIMessage.createMany({
@@ -157,7 +198,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ reply, highlightId });
+    return NextResponse.json({ reply, highlightId, suggestedScore, noteItems });
   } catch (error) {
     console.error("OpenAI error:", error);
     return NextResponse.json(

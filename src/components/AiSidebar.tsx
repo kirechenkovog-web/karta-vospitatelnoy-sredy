@@ -11,12 +11,16 @@ interface Message {
   isEvent?: boolean;
 }
 
+interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
+
 interface AiSidebarProps {
   sessionId: string;
   stage: number;
   aspectCode?: string;
   autoTrigger: string;
   sessionContext?: string;
+  onScoreSuggested?: (score: number) => void;
+  onNotesUpdated?: (notes: NoteItem[]) => void;
 }
 
 const MIN_WIDTH = 44;
@@ -29,6 +33,8 @@ export default function AiSidebar({
   aspectCode,
   autoTrigger,
   sessionContext,
+  onScoreSuggested,
+  onNotesUpdated,
 }: AiSidebarProps) {
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [collapsed, setCollapsed] = useState(false);
@@ -46,12 +52,28 @@ export default function AiSidebar({
   const aspectRef = useRef(aspectCode);
   const sessionContextRef = useRef(sessionContext);
   const messagesRef = useRef(messages);
+  const onScoreSuggestedRef = useRef(onScoreSuggested);
+  const onNotesUpdatedRef = useRef(onNotesUpdated);
 
   sessionRef.current = sessionId;
   stageRef.current = stage;
   aspectRef.current = aspectCode;
   sessionContextRef.current = sessionContext;
   messagesRef.current = messages;
+  onScoreSuggestedRef.current = onScoreSuggested;
+  onNotesUpdatedRef.current = onNotesUpdated;
+
+  function handleAiResponse(data: { reply?: string; error?: string; highlightId?: string; suggestedScore?: number; noteItems?: NoteItem[] }) {
+    const reply = data.reply || data.error || "Ошибка";
+    if (data.highlightId) setHighlight(data.highlightId);
+    if (data.suggestedScore !== null && data.suggestedScore !== undefined) {
+      onScoreSuggestedRef.current?.(data.suggestedScore);
+    }
+    if (data.noteItems && data.noteItems.length > 0) {
+      onNotesUpdatedRef.current?.(data.noteItems);
+    }
+    return reply;
+  }
 
   // Drag-to-resize
   const isDragging = useRef(false);
@@ -120,9 +142,8 @@ export default function AiSidebar({
       setLoading(true);
       try {
         const data = await callChat(eventText, updatedHistory, false);
-        const reply = data.reply || data.error || "Ошибка";
+        const reply = handleAiResponse(data);
         setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-        if (data.highlightId) setHighlight(data.highlightId);
       } catch {
         // silent fail for events
       } finally {
@@ -149,15 +170,17 @@ export default function AiSidebar({
       try {
         const data = await callChat(autoTrigger, [], true);
         if (cancelled) return;
-        const reply = data.reply || data.error || "Ошибка";
+        const reply = handleAiResponse(data);
         setMessages([{ role: "assistant", content: reply }]);
         if (stageRef.current === 1 && aspectRef.current) setShowHintsButton(true);
-        // Use AI highlight or fallback by stage context
-        const hl = data.highlightId ||
-          (stageRef.current === 1 && aspectRef.current ? "score-selector" : null) ||
-          (stageRef.current === 1 && !aspectRef.current ? "aspect-card-social_partners" : null) ||
-          (stageRef.current === 3 ? "focus-selector" : null);
-        if (hl) setHighlight(hl);
+        // Fallback highlights if AI didn't send one
+        if (!data.highlightId) {
+          const fallback =
+            (stageRef.current === 1 && aspectRef.current ? "score-selector" : null) ||
+            (stageRef.current === 1 && !aspectRef.current ? "aspect-card-social_partners" : null) ||
+            (stageRef.current === 3 ? "focus-selector" : null);
+          if (fallback) setHighlight(fallback);
+        }
       } catch {
         if (!cancelled) setMessages([{ role: "assistant", content: "Не удалось загрузить контекст." }]);
       } finally {
@@ -185,9 +208,8 @@ export default function AiSidebar({
 
     try {
       const data = await callChat(text, newMessages, false);
-      const reply = data.reply || data.error || "Ошибка";
+      const reply = handleAiResponse(data);
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-      if (data.highlightId) setHighlight(data.highlightId);
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Ошибка соединения." }]);
     } finally {
@@ -316,9 +338,8 @@ export default function AiSidebar({
                     setLoading(true);
                     try {
                       const data = await callChat(text, updated, false);
-                      const reply = data.reply || data.error || "Ошибка";
+                      const reply = handleAiResponse(data);
                       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-                      if (data.highlightId) setHighlight(data.highlightId);
                     } catch {
                       setMessages((prev) => [...prev, { role: "assistant", content: "Ошибка соединения." }]);
                     } finally {
