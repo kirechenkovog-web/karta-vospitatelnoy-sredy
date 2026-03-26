@@ -141,9 +141,11 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
           return (
             <div key={asp.code} className="rounded-2xl overflow-hidden"
               style={{ background: "var(--surface)", border: `1px solid ${dived ? asp.color + "60" : "var(--border)"}` }}>
+
+              {/* Header — always visible */}
               <button
                 onClick={() => setOpenCode(isOpen ? null : asp.code)}
-                className="w-full flex items-center justify-between p-4 text-left"
+                className="w-full flex items-center justify-between px-4 pt-3 pb-2 text-left"
                 style={{ background: "none", border: "none", cursor: "pointer" }}
               >
                 <div className="flex items-center gap-3">
@@ -156,23 +158,42 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
                     {dived && <div className="text-xs" style={{ color: asp.color }}>✓ Углублён</div>}
                   </div>
                 </div>
-                <div style={{ color: "var(--muted)", fontSize: 14 }}>{isOpen ? "▲" : "▼"}</div>
+                <div style={{ color: "var(--muted)", fontSize: 12 }}>{isOpen ? "▲" : "▼"}</div>
               </button>
 
+              {/* Summary — always visible when collapsed */}
+              {!isOpen && (
+                <div className="px-4 pb-3 grid grid-cols-2 gap-x-3 gap-y-1">
+                  {FIELDS.map((field) => {
+                    const val = getDraft(asp.code, field.key)?.trim();
+                    return (
+                      <div key={field.key} className="flex gap-1.5 items-start min-w-0">
+                        <span className="w-2 h-2 rounded-full flex-shrink-0 mt-1" style={{ background: field.color }} />
+                        <div className="min-w-0">
+                          <span className="text-xs font-medium" style={{ color: "var(--muted)" }}>{field.label}: </span>
+                          <span className="text-xs" style={{ color: val ? "var(--foreground)" : "var(--muted)", opacity: val ? 1 : 0.5 }}>
+                            {val ? (val.length > 45 ? val.slice(0, 45) + "…" : val) : "не заполнено"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Edit panel — expanded only */}
               {isOpen && (
                 <div className="px-4 pb-4" style={{ borderTop: "1px solid var(--border)" }}>
                   <div className="pt-3 grid grid-cols-2 gap-3">
-                    {FIELDS.map((field) => {
-                      return (
-                        <FieldBlock
-                          key={field.key}
-                          field={field}
-                          value={getDraft(asp.code, field.key)}
-                          onChange={(v) => setDraft(asp.code, field.key, v)}
-                          onBlur={(v) => { if (v.trim()) sendEvent(`[СОБЫТИЕ: Пользователь заполнил поле «${field.label}» по аспекту «${asp.shortTitle}»: «${v.trim()}»]`); }}
-                        />
-                      );
-                    })}
+                    {FIELDS.map((field) => (
+                      <FieldBlock
+                        key={field.key}
+                        field={field}
+                        value={getDraft(asp.code, field.key)}
+                        onChange={(v) => setDraft(asp.code, field.key, v)}
+                        onBlur={(v) => { if (v.trim()) sendEvent(`[СОБЫТИЕ: Пользователь заполнил поле «${field.label}» по аспекту «${asp.shortTitle}»: «${v.trim()}»]`); }}
+                      />
+                    ))}
                   </div>
                   <button
                     onClick={() => saveDeepDive(asp.code)}
