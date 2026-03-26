@@ -20,8 +20,8 @@ interface AiSidebarProps {
 }
 
 const MIN_WIDTH = 44;
-const DEFAULT_WIDTH = 340;
-const MAX_WIDTH = 600;
+const DEFAULT_WIDTH = 510;
+const MAX_WIDTH = 700;
 
 export default function AiSidebar({
   sessionId,

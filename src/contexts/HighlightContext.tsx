@@ -22,9 +22,6 @@ export function HighlightProvider({ children }: { children: ReactNode }) {
   const setHighlight = useCallback((id: string | null) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setHighlightedId(id);
-    if (id) {
-      timerRef.current = setTimeout(() => setHighlightedId(null), 8000);
-    }
   }, []);
 
   const clearHighlight = useCallback((id: string) => {
