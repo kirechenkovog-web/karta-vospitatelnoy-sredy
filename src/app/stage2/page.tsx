@@ -236,7 +236,7 @@ function FieldBlock({
   onChange,
   onBlur,
 }: {
-  field: { key: string; id: string; label: string; desc: string; color: string };
+  field: { key: string; id: string; label: string; desc: string; color: string; icon: string };
   value: string;
   onChange: (v: string) => void;
   onBlur?: (v: string) => void;
@@ -250,7 +250,7 @@ function FieldBlock({
       onClick={onInteract}
     >
       <div className="flex items-center gap-1.5 mb-1">
-        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: field.color }} />
+        <span style={{ fontSize: 14, lineHeight: 1 }}>{field.icon}</span>
         <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>{field.label}</span>
       </div>
       <div className="text-xs mb-1" style={{ color: "var(--muted)" }}>{field.desc}</div>
