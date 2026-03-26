@@ -10,16 +10,29 @@ export async function POST(req: NextRequest) {
 
   const userId = session.user.id;
 
-  const existing = await prisma.assessmentSession.findFirst({
+  // Find the most recent in-progress session first
+  const inProgress = await prisma.assessmentSession.findFirst({
     where: { userId, status: "in_progress" },
     orderBy: { updatedAt: "desc" },
     include: { scores: true, deepDives: true, focusPlan: true },
   });
 
-  if (existing) {
-    return NextResponse.json({ session: existing });
+  if (inProgress) {
+    return NextResponse.json({ session: inProgress });
   }
 
+  // Fall back to the most recent completed session — never lose data
+  const completed = await prisma.assessmentSession.findFirst({
+    where: { userId, status: "completed" },
+    orderBy: { updatedAt: "desc" },
+    include: { scores: true, deepDives: true, focusPlan: true },
+  });
+
+  if (completed) {
+    return NextResponse.json({ session: completed });
+  }
+
+  // No session at all — create a fresh one
   const newSession = await prisma.assessmentSession.create({
     data: { userId },
     include: { scores: true, deepDives: true, focusPlan: true },
