@@ -408,6 +408,7 @@ export default function MapPage() {
   useEffect(() => {
     const sessionIdParam = searchParams.get("sessionId");
     const isNew = searchParams.get("new") === "1";
+    const skipOnboarding = searchParams.get("ob") === "1";
 
     const sessionPromise = sessionIdParam
       ? fetch(`/api/session?sessionId=${sessionIdParam}`).then((r) => r.json()).then((d) => ({ session: d }))
@@ -417,10 +418,12 @@ export default function MapPage() {
           body: JSON.stringify({ forceNew: isNew }),
         }).then((r) => r.json());
 
-    sessionPromise
-      .then((sessionData) => {
-        // TODO: re-enable onboarding check after testing:
-        // if (!onb.onboardingDone) { router.push("/onboarding"); return; }
+    Promise.all([
+      skipOnboarding ? Promise.resolve({ onboardingDone: true }) : fetch("/api/onboarding").then((r) => r.json()),
+      sessionPromise,
+    ])
+      .then(([onb, sessionData]) => {
+        if (!onb.onboardingDone) { router.push("/onboarding"); return; }
         if (sessionData.error) { router.push("/login"); return; }
         const sid = sessionIdParam ? sessionIdParam : sessionData.session.id;
         return fetch(`/api/session?sessionId=${sid}`)
@@ -428,8 +431,7 @@ export default function MapPage() {
           .then((full) => {
             if (full.error) { router.push("/login"); return; }
             setSession(full);
-            // Remove ?new=1 from URL after session is created
-            if (isNew) router.replace("/map");
+            if (isNew || skipOnboarding) router.replace("/map");
           });
       })
       .catch(() => router.push("/login"))
