@@ -28,14 +28,7 @@ function Illus({ code, active }: { code: string; active: boolean }) {
     <img
       src={`/illustrations/${code}.png`}
       alt=""
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-        opacity: active ? 1 : 0.35,
-        filter: active ? "none" : "grayscale(0.7)",
-        transition: "opacity 0.2s, filter 0.2s",
-      }}
+      style={{ width: "100%", height: "100%", objectFit: "contain" }}
     />
   );
 }
@@ -43,23 +36,23 @@ function Illus({ code, active }: { code: string; active: boolean }) {
 // ─── Score circle ────────────────────────────────────────────────────────────
 
 function ScoreCircle({ score, color }: { score: number; color: string }) {
-  const r = 17;
+  const r = 21;
   const circ = 2 * Math.PI * r;
   const filled = (score / 10) * circ;
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
-      <circle cx="24" cy="24" r={r} fill="none" stroke={color + "25"} strokeWidth="3.5" />
+    <svg width="58" height="58" viewBox="0 0 58 58" style={{ flexShrink: 0 }}>
+      <circle cx="29" cy="29" r={r} fill="none" stroke={color + "25"} strokeWidth="4" />
       <circle
-        cx="24" cy="24" r={r}
+        cx="29" cy="29" r={r}
         fill="none"
         stroke={color}
-        strokeWidth="3.5"
+        strokeWidth="4"
         strokeDasharray={`${filled} ${circ - filled}`}
         strokeLinecap="round"
-        transform="rotate(-90 24 24)"
+        transform="rotate(-90 29 29)"
       />
-      <text x="24" y="21" textAnchor="middle" fontSize="11" fontWeight="700" fill={color}>{score}</text>
-      <text x="24" y="31" textAnchor="middle" fontSize="8" fill={color + "99"}>из 10</text>
+      <text x="29" y="25" textAnchor="middle" fontSize="13" fontWeight="700" fill={color}>{score}</text>
+      <text x="29" y="37" textAnchor="middle" fontSize="9" fill={color + "99"}>из 10</text>
     </svg>
   );
 }
@@ -83,8 +76,7 @@ function AspectCard({ aspect, score, isCompleted }: {
           background: isCompleted ? aspect.color + "12" : "var(--surface)",
           border: `1px solid ${isCompleted ? aspect.color + "40" : "var(--border)"}`,
           boxShadow: isCompleted ? `0 4px 20px ${aspect.color}20` : "var(--card-shadow)",
-          minHeight: 220,
-          opacity: isCompleted ? 1 : 0.75,
+          minHeight: 170,
           display: "flex",
           flexDirection: "column",
         }}
@@ -93,10 +85,10 @@ function AspectCard({ aspect, score, isCompleted }: {
         <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: isCompleted ? aspect.color : "transparent" }} />
 
         {/* header: title left, score right */}
-        <div className="flex items-start justify-between px-3 pt-3" style={{ minHeight: 52 }}>
+        <div className="flex items-start justify-between px-3 pt-2" style={{ minHeight: 60 }}>
           <div
-            className="font-semibold leading-snug pr-2"
-            style={{ color: isCompleted ? aspect.color : "var(--muted)", fontSize: 13, maxWidth: "65%" }}
+            className="font-semibold leading-snug pr-2 pt-1"
+            style={{ color: isCompleted ? aspect.color : "var(--foreground)", fontSize: 15, maxWidth: "62%" }}
           >
             {aspect.shortTitle}
           </div>
@@ -106,7 +98,7 @@ function AspectCard({ aspect, score, isCompleted }: {
         </div>
 
         {/* illustration — fills remaining space */}
-        <div className="flex-1 px-3 pb-3" style={{ minHeight: 140 }}>
+        <div className="flex-1 px-2 pb-2" style={{ minHeight: 90 }}>
           <Illus code={aspect.code} active={isCompleted} />
         </div>
       </div>
@@ -146,8 +138,8 @@ function MapContent({ session, userName }: { session: Session; userName: string 
         </div>
       </header>
 
-      <main className="p-6">
-        <div className="flex items-center justify-between mb-4">
+      <main className="px-4 py-3">
+        <div className="flex items-center justify-between mb-2">
           <div>
             <h1 className="text-xl font-bold mb-0.5" style={{ color: "var(--foreground)" }}>Этап 1 — Оценка карты</h1>
             <p className="text-xs" style={{ color: "var(--muted)" }}>Оцените каждый аспект по шкале 0–10. Начните с любого.</p>
@@ -166,14 +158,14 @@ function MapContent({ session, userName }: { session: Session; userName: string 
           )}
         </div>
 
-        <div className="mb-5 h-1 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
+        <div className="mb-2 h-1 rounded-full overflow-hidden" style={{ background: "var(--surface-2)" }}>
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{ width: `${(completedCount / 12) * 100}%`, background: "#4F46E5" }}
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2">
           {ASPECTS.map((aspect) => {
             const score = getScore(aspect.code);
             const isCompleted = score?.status === "completed";
