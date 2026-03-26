@@ -9,30 +9,34 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = session.user.id;
+  const body = await req.json().catch(() => ({}));
+  const forceNew = body.forceNew === true;
 
-  // Find the most recent in-progress session first
-  const inProgress = await prisma.assessmentSession.findFirst({
-    where: { userId, status: "in_progress" },
-    orderBy: { updatedAt: "desc" },
-    include: { scores: true, deepDives: true, focusPlan: true },
-  });
+  if (!forceNew) {
+    // Find the most recent in-progress session first
+    const inProgress = await prisma.assessmentSession.findFirst({
+      where: { userId, status: "in_progress" },
+      orderBy: { updatedAt: "desc" },
+      include: { scores: true, deepDives: true, focusPlan: true },
+    });
 
-  if (inProgress) {
-    return NextResponse.json({ session: inProgress });
+    if (inProgress) {
+      return NextResponse.json({ session: inProgress });
+    }
+
+    // Fall back to the most recent completed session — never lose data
+    const completed = await prisma.assessmentSession.findFirst({
+      where: { userId, status: "completed" },
+      orderBy: { updatedAt: "desc" },
+      include: { scores: true, deepDives: true, focusPlan: true },
+    });
+
+    if (completed) {
+      return NextResponse.json({ session: completed });
+    }
   }
 
-  // Fall back to the most recent completed session — never lose data
-  const completed = await prisma.assessmentSession.findFirst({
-    where: { userId, status: "completed" },
-    orderBy: { updatedAt: "desc" },
-    include: { scores: true, deepDives: true, focusPlan: true },
-  });
-
-  if (completed) {
-    return NextResponse.json({ session: completed });
-  }
-
-  // No session at all — create a fresh one
+  // No session at all (or forceNew) — create a fresh one
   const newSession = await prisma.assessmentSession.create({
     data: { userId },
     include: { scores: true, deepDives: true, focusPlan: true },
@@ -42,7 +46,24 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const auth2 = await auth();
+  if (!auth2?.user?.id) {
+    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+  }
+
   const sessionId = req.nextUrl.searchParams.get("sessionId");
+  const list = req.nextUrl.searchParams.get("list");
+
+  // Return all sessions for current user
+  if (list === "true") {
+    const sessions = await prisma.assessmentSession.findMany({
+      where: { userId: auth2.user.id },
+      orderBy: { createdAt: "desc" },
+      include: { scores: true },
+    });
+    return NextResponse.json(sessions);
+  }
+
   if (!sessionId) {
     return NextResponse.json({ error: "sessionId обязателен" }, { status: 400 });
   }

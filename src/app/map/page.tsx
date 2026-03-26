@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ASPECTS, getAspect } from "@/data/aspects";
 import AppShell from "@/components/AppShell";
@@ -394,6 +394,7 @@ function MapGrid({
 
 export default function MapPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [openAspect, setOpenAspect] = useState<string | null>(null);
@@ -405,23 +406,35 @@ export default function MapPage() {
   openAspectRef.current = openAspect;
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/onboarding").then((r) => r.json()),
-      fetch("/api/session", { method: "POST" }).then((r) => r.json()),
-    ])
-      .then(([onb, sessionData]) => {
-        if (!onb.onboardingDone) { router.push("/onboarding"); return; }
+    const sessionIdParam = searchParams.get("sessionId");
+    const isNew = searchParams.get("new") === "1";
+
+    const sessionPromise = sessionIdParam
+      ? fetch(`/api/session?sessionId=${sessionIdParam}`).then((r) => r.json()).then((d) => ({ session: d }))
+      : fetch("/api/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ forceNew: isNew }),
+        }).then((r) => r.json());
+
+    sessionPromise
+      .then((sessionData) => {
+        // TODO: re-enable onboarding check after testing:
+        // if (!onb.onboardingDone) { router.push("/onboarding"); return; }
         if (sessionData.error) { router.push("/login"); return; }
-        return fetch(`/api/session?sessionId=${sessionData.session.id}`)
+        const sid = sessionIdParam ? sessionIdParam : sessionData.session.id;
+        return fetch(`/api/session?sessionId=${sid}`)
           .then((r) => r.json())
           .then((full) => {
             if (full.error) { router.push("/login"); return; }
             setSession(full);
+            // Remove ?new=1 from URL after session is created
+            if (isNew) router.replace("/map");
           });
       })
       .catch(() => router.push("/login"))
       .finally(() => setLoading(false));
-  }, [router]);
+  }, [router, searchParams]);
 
   const refreshSession = useCallback(async () => {
     if (!session) return;
