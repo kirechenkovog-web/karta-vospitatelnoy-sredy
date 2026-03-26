@@ -35,6 +35,7 @@ export default function AiSidebar({
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showHintsButton, setShowHintsButton] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { setHighlight } = useHighlight();
   const { registerHandler } = useAiEvent();
@@ -138,6 +139,7 @@ export default function AiSidebar({
     setMessages([]);
     setLoading(false);
     loadingRef.current = false;
+    setShowHintsButton(false);
 
     let cancelled = false;
     const timer = setTimeout(async () => {
@@ -149,6 +151,7 @@ export default function AiSidebar({
         if (cancelled) return;
         const reply = data.reply || data.error || "Ошибка";
         setMessages([{ role: "assistant", content: reply }]);
+        if (stageRef.current === 1 && aspectRef.current) setShowHintsButton(true);
         // Use AI highlight or fallback by stage context
         const hl = data.highlightId ||
           (stageRef.current === 1 && aspectRef.current ? "score-selector" : null) ||
@@ -173,6 +176,7 @@ export default function AiSidebar({
     const text = input.trim();
     if (!text || loading) return;
     setInput("");
+    setShowHintsButton(false);
 
     const newMessages: Message[] = [...messages, { role: "user", content: text }];
     setMessages(newMessages);
@@ -298,6 +302,38 @@ export default function AiSidebar({
                 </div>
               </div>
             )}
+
+            {showHintsButton && !loading && (
+              <div className="flex justify-start pl-8">
+                <button
+                  onClick={async () => {
+                    setShowHintsButton(false);
+                    const text = "Задай наводящие вопросы";
+                    const userMsg: Message = { role: "user", content: text };
+                    const updated = [...messagesRef.current, userMsg];
+                    setMessages(updated);
+                    loadingRef.current = true;
+                    setLoading(true);
+                    try {
+                      const data = await callChat(text, updated, false);
+                      const reply = data.reply || data.error || "Ошибка";
+                      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+                      if (data.highlightId) setHighlight(data.highlightId);
+                    } catch {
+                      setMessages((prev) => [...prev, { role: "assistant", content: "Ошибка соединения." }]);
+                    } finally {
+                      loadingRef.current = false;
+                      setLoading(false);
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-sm transition-all hover:opacity-80"
+                  style={{ background: "#4F46E515", color: "#4F46E5", border: "1px solid #4F46E540", cursor: "pointer" }}
+                >
+                  💡 Задай наводящие вопросы
+                </button>
+              </div>
+            )}
+
             <div ref={bottomRef} />
           </div>
 

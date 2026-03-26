@@ -35,6 +35,12 @@ function Illus({ code, active }: { code: string; active: boolean }) {
 
 // ─── Score circle ────────────────────────────────────────────────────────────
 
+function getScoreColor(score: number): string {
+  if (score >= 8) return "#22c55e";
+  if (score >= 5) return "#eab308";
+  return "#ef4444";
+}
+
 function ScoreCircle({ score, color }: { score: number; color: string }) {
   const r = 21;
   const circ = 2 * Math.PI * r;
@@ -94,7 +100,7 @@ function AspectCard({ aspect, score, isCompleted }: {
             {aspect.shortTitle}
           </div>
           {isCompleted && score?.score != null && (
-            <ScoreCircle score={score.score} color={aspect.color} />
+            <ScoreCircle score={score.score} color={getScoreColor(score.score)} />
           )}
         </div>
 
