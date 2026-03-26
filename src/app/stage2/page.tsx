@@ -135,7 +135,16 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
 
       <div className="mb-4 mt-3">
         <h1 className="text-xl font-bold mb-0.5" style={{ color: "var(--foreground)" }}>Этап 2 — Углублённый анализ</h1>
-        <p className="text-xs" style={{ color: "var(--muted)" }}>Выберите значимые аспекты и опишите результаты, ресурсы, вызовы и индикаторы.</p>
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          <p className="text-xs" style={{ color: "var(--muted)" }}>Выберите значимые аспекты и опишите:</p>
+          {FIELDS.map((field) => (
+            <div key={field.key} className="flex items-center gap-1 px-2 py-0.5 rounded-md"
+              style={{ background: field.color + "15", border: `1px solid ${field.color}30` }}>
+              <span style={{ fontSize: 13 }}>{field.icon}</span>
+              <span className="text-xs font-medium" style={{ color: field.color }}>{field.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -217,25 +226,6 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
         })}
       </div>
 
-      {/* Legend */}
-      <div className="mt-4 flex items-center gap-4 flex-wrap px-1">
-        <span className="text-xs" style={{ color: "var(--muted)" }}>Легенда:</span>
-        {FIELDS.map((field) => (
-          <div key={field.key} className="flex items-center gap-1.5 px-2 py-1 rounded-lg"
-            style={{ background: field.color + "15", border: `1px solid ${field.color}30` }}>
-            <span className="text-sm">{field.icon}</span>
-            <span className="text-xs font-medium" style={{ color: field.color }}>{field.label}</span>
-          </div>
-        ))}
-        <div className="flex items-center gap-3 ml-2" style={{ borderLeft: "1px solid var(--border)", paddingLeft: 12 }}>
-          {[{ color: "#22c55e", label: "8–10" }, { color: "#eab308", label: "5–7" }, { color: "#ef4444", label: "0–4" }].map((s) => (
-            <div key={s.label} className="flex items-center gap-1">
-              <div className="w-5 h-5 rounded-md text-xs font-bold flex items-center justify-center" style={{ background: s.color + "20", color: s.color }}>7</div>
-              <span className="text-xs" style={{ color: "var(--muted)" }}>{s.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
