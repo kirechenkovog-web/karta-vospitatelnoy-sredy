@@ -30,10 +30,10 @@ interface Session {
 }
 
 const FIELDS = [
-  { key: "resultsText", id: "results-field", label: "Результаты", desc: "Что уже достигнуто", color: "#22c55e" },
-  { key: "resourcesText", id: "resources-field", label: "Ресурсы", desc: "Что есть в наличии", color: "#4F46E5" },
-  { key: "challengesText", id: "challenges-field", label: "Вызовы", desc: "Что создаёт трудности", color: "#ef4444" },
-  { key: "indicatorsText", id: "indicators-field", label: "Индикаторы", desc: "Как понять, что стало лучше", color: "#f59e0b" },
+  { key: "resultsText", id: "results-field", label: "Результаты", desc: "Что уже достигнуто", color: "#22c55e", icon: "📈" },
+  { key: "resourcesText", id: "resources-field", label: "Ресурсы", desc: "Что есть в наличии", color: "#4F46E5", icon: "🔧" },
+  { key: "challengesText", id: "challenges-field", label: "Вызовы", desc: "Что создаёт трудности", color: "#ef4444", icon: "⚡" },
+  { key: "indicatorsText", id: "indicators-field", label: "Индикаторы", desc: "Как понять, что стало лучше", color: "#f59e0b", icon: "🎯" },
 ];
 
 function getScoreColor(score: number): string {
@@ -176,9 +176,9 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
                   {filledFields.map((field) => {
                     const val = getDraft(asp.code, field.key)!.trim();
                     return (
-                      <div key={field.key} className="rounded-lg px-2 py-1 min-w-0 max-w-full"
+                      <div key={field.key} className="rounded-lg px-2 py-1 min-w-0 max-w-full flex items-start gap-1.5"
                         style={{ background: field.color + "15", border: `1px solid ${field.color}30` }}>
-                        <span className="text-xs font-semibold mr-1" style={{ color: field.color }}>{field.label}:</span>
+                        <span className="text-sm flex-shrink-0 leading-tight">{field.icon}</span>
                         <span className="text-xs" style={{ color: "var(--foreground)" }}>
                           {val.length > 60 ? val.slice(0, 60) + "…" : val}
                         </span>
@@ -221,8 +221,9 @@ function Stage2Content({ session, userName }: { session: Session; userName: stri
       <div className="mt-4 flex items-center gap-4 flex-wrap px-1">
         <span className="text-xs" style={{ color: "var(--muted)" }}>Легенда:</span>
         {FIELDS.map((field) => (
-          <div key={field.key} className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded" style={{ background: field.color + "30", border: `1px solid ${field.color}60` }} />
+          <div key={field.key} className="flex items-center gap-1.5 px-2 py-1 rounded-lg"
+            style={{ background: field.color + "15", border: `1px solid ${field.color}30` }}>
+            <span className="text-sm">{field.icon}</span>
             <span className="text-xs font-medium" style={{ color: field.color }}>{field.label}</span>
           </div>
         ))}
