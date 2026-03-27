@@ -153,53 +153,67 @@ function PanelReady() {
 
 function PanelIntro() {
   return (
-    <div className="h-full flex flex-col items-center justify-center px-10 gap-8" style={{ background: "var(--surface)" }}>
-      {/* Icon */}
-      <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-        style={{ background: "#4F46E515", color: "#4F46E5", fontSize: 28, border: "1px solid #4F46E530" }}
-      >
-        ✦
+    <div
+      className="h-full flex flex-col items-center justify-center px-10 gap-10"
+      style={{ background: "linear-gradient(160deg, #f8f7ff 0%, #f0effe 60%, #e8e5fd 100%)" }}
+    >
+      {/* Brand icon */}
+      <div className="flex flex-col items-center gap-4">
+        <div
+          className="w-20 h-20 rounded-3xl flex items-center justify-center flex-shrink-0"
+          style={{
+            background: "linear-gradient(135deg, #6366f1 0%, #4F46E5 100%)",
+            color: "#fff",
+            fontSize: 36,
+            boxShadow: "0 8px 32px #4F46E540",
+          }}
+        >
+          ✦
+        </div>
+
+        {/* Title block */}
+        <div className="text-center">
+          <div className="text-3xl font-bold mb-2 leading-snug" style={{ color: "#1e1b4b" }}>
+            Карта воспитательной среды
+          </div>
+          <div className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>
+            Инструмент самодиагностики для советника директора по воспитанию
+          </div>
+        </div>
       </div>
 
-      {/* Title block */}
-      <div className="text-center">
-        <div className="text-2xl font-bold mb-2 leading-snug" style={{ color: "var(--foreground)" }}>
-          Карта воспитательной среды
-        </div>
-        <div className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-          Инструмент самодиагностики для советника директора по воспитанию
-        </div>
-      </div>
-
-      {/* Stages */}
-      <div className="w-full flex flex-col gap-2">
+      {/* Stages — 3 in a row */}
+      <div className="w-full flex gap-3">
         {[
-          { t: "Оценка", sub: "12 аспектов работы", c: "#22c55e" },
-          { t: "Анализ", sub: "Углублённый разбор", c: "#4F46E5" },
-          { t: "Фокус", sub: "План на 2 месяца", c: "#f59e0b" },
-        ].map((s, i) => (
+          { num: "1", t: "Оценка", sub: "12 аспектов работы", c: "#22c55e", bg: "#f0fdf4", border: "#bbf7d0" },
+          { num: "2", t: "Анализ", sub: "Углублённый разбор", c: "#4F46E5", bg: "#eef2ff", border: "#c7d2fe" },
+          { num: "3", t: "Фокус", sub: "План на 2 месяца", c: "#f59e0b", bg: "#fffbeb", border: "#fde68a" },
+        ].map((s) => (
           <div
             key={s.t}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl"
-            style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
+            className="flex-1 rounded-2xl p-4 flex flex-col gap-2"
+            style={{ background: s.bg, border: `1.5px solid ${s.border}` }}
           >
             <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-bold text-white flex-shrink-0"
               style={{ background: s.c }}
             >
-              {i + 1}
+              {s.num}
             </div>
             <div>
-              <div className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>{s.t}</div>
-              <div className="text-xs" style={{ color: "var(--muted)" }}>{s.sub}</div>
+              <div className="font-bold text-sm" style={{ color: "#111827" }}>{s.t}</div>
+              <div className="text-xs mt-0.5" style={{ color: "#6b7280" }}>{s.sub}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Time estimate */}
-      <div className="text-xs px-3 py-1.5 rounded-full" style={{ background: "var(--surface-2)", color: "var(--muted)", border: "1px solid var(--border)" }}>
+      {/* Time */}
+      <div className="flex items-center gap-2 text-sm" style={{ color: "#9ca3af" }}>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5"/>
+          <path d="M7 4v3.5l2 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
         ~20–30 минут
       </div>
     </div>
