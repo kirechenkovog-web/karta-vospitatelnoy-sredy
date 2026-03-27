@@ -316,7 +316,7 @@ function PanelIntro() {
       <div className="text-center">
         <div className="text-4xl font-bold text-white mb-3">Карта воспитательной среды</div>
         <div className="text-lg" style={{ color: "#94a3b8" }}>
-          Инструмент самодиагностики для советника директора школы
+          Инструмент самодиагностики для советника директора по воспитанию
         </div>
       </div>
 
