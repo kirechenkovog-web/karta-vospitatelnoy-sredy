@@ -332,41 +332,55 @@ function PanelReady() {
 
 function PanelIntro() {
   return (
-    <div
-      className="h-full flex flex-col items-center justify-center px-16 gap-10"
-      style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%)" }}
-    >
+    <div className="h-full flex flex-col items-center justify-center px-10 gap-8" style={{ background: "var(--surface)" }}>
       {/* Icon */}
-      <div style={{ fontSize: 64, color: "#4F46E5", animation: "pulse 2s infinite" }}>✦</div>
+      <div
+        className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+        style={{ background: "#4F46E515", color: "#4F46E5", fontSize: 28, border: "1px solid #4F46E530" }}
+      >
+        ✦
+      </div>
 
       {/* Title block */}
       <div className="text-center">
-        <div className="text-4xl font-bold text-white mb-3">Карта воспитательной среды</div>
-        <div className="text-lg" style={{ color: "#94a3b8" }}>
+        <div className="text-2xl font-bold mb-2 leading-snug" style={{ color: "var(--foreground)" }}>
+          Карта воспитательной среды
+        </div>
+        <div className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
           Инструмент самодиагностики для советника директора по воспитанию
         </div>
       </div>
 
       {/* Stages */}
-      <div className="flex gap-4">
+      <div className="w-full flex flex-col gap-2">
         {[
           { t: "Оценка", sub: "12 аспектов работы", c: "#22c55e" },
           { t: "Анализ", sub: "Углублённый разбор", c: "#4F46E5" },
           { t: "Фокус", sub: "План на 2 месяца", c: "#f59e0b" },
-        ].map((s) => (
+        ].map((s, i) => (
           <div
             key={s.t}
-            className="flex-1 rounded-2xl px-5 py-4 flex flex-col gap-1"
-            style={{ background: s.c + "18", border: `1px solid ${s.c}40` }}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl"
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
           >
-            <div className="text-xs font-semibold" style={{ color: s.c }}>{s.t}</div>
-            <div className="text-sm text-white">{s.sub}</div>
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 text-white"
+              style={{ background: s.c }}
+            >
+              {i + 1}
+            </div>
+            <div>
+              <div className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>{s.t}</div>
+              <div className="text-xs" style={{ color: "var(--muted)" }}>{s.sub}</div>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Time estimate */}
-      <div className="text-sm" style={{ color: "#94a3b8" }}>~20–30 минут</div>
+      <div className="text-xs px-3 py-1.5 rounded-full" style={{ background: "var(--surface-2)", color: "var(--muted)", border: "1px solid var(--border)" }}>
+        ~20–30 минут
+      </div>
     </div>
   );
 }
