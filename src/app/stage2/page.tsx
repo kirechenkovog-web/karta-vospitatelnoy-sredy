@@ -219,7 +219,7 @@ function Stage2Content({ session }: { session: Session }) {
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Выберите аспект для анализа</div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 overflow-y-auto" style={{ maxHeight: "38vh" }}>
             {ASPECTS.map((asp) => {
               const sc = getScore(asp.code);
               const dived = isDeepDived(asp.code);

@@ -111,7 +111,7 @@ function Stage3Content({ session }: { session: Session }) {
         </div>
         <p className="text-xs mb-3" style={{ color: "var(--muted)" }}>Рекомендуем выбирать из углублённых на этапе 2</p>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 overflow-y-auto" style={{ maxHeight: "38vh" }}>
           {ASPECTS.map((asp) => {
             const sc = getScore(asp.code);
             const scoreNum = sc?.score ?? null;
