@@ -150,47 +150,71 @@ function PanelAspects() {
   );
 }
 
-// ─── Right panel: Stage 2 (deep dive cards) ───────────────────────────────────
+// ─── Right panel: Stage 2 (compact list + edit window) ────────────────────────
 
 function PanelStage2() {
+  const selectedCode = "students_involvement";
+  const selectedAsp = ASPECTS.find((a) => a.code === selectedCode)!;
+
   return (
-    <div className="flex flex-col h-full overflow-auto p-4">
-      <div className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: "var(--muted)" }}>
+    <div className="flex flex-col h-full overflow-auto p-4 gap-3">
+      <div className="text-xs font-semibold flex items-center gap-2" style={{ color: "var(--muted)" }}>
         <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: "#4F46E5" }}>2</span>
         Этап 2 — Углублённый анализ
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {MOCK_DIVES.map((code) => {
-          const asp = ASPECTS.find((a) => a.code === code)!;
-          const score = MOCK_SCORES[code];
-          const scoreColor = getScoreColor(score);
-          const filledFieldKeys = MOCK_FIELD_DATA[code] ?? [];
-          const filledFields = FIELDS.filter((f) => filledFieldKeys.includes(f.key));
 
+      {/* Compact list */}
+      <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border)", background: "var(--surface)" }}>
+        {ASPECTS.slice(0, 6).map((asp, idx) => {
+          const score = MOCK_SCORES[asp.code];
+          const scoreColor = getScoreColor(score);
+          const isSelected = asp.code === selectedCode;
+          const isDived = MOCK_DIVES.includes(asp.code);
+          const filledCount = (MOCK_FIELD_DATA[asp.code] ?? []).length;
           return (
-            <div key={code} className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid #4F46E540" }}>
-              {/* header */}
-              <div className="flex items-center gap-2 px-3 pt-2.5 pb-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  style={{ background: scoreColor + "20", color: scoreColor }}>
-                  {score}
-                </div>
-                <div className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>{asp.shortTitle}</div>
-                <div className="text-xs ml-auto" style={{ color: "#4F46E5" }}>✓</div>
+            <div key={asp.code} className="flex items-center gap-2 px-3 py-2"
+              style={{
+                borderBottom: idx < 5 ? "1px solid var(--border)" : "none",
+                background: isSelected ? "#4F46E508" : "transparent",
+                borderLeft: isSelected ? "3px solid #4F46E5" : "3px solid transparent",
+              }}>
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+                style={{ background: scoreColor + "20", color: scoreColor }}>{score}</div>
+              <div className="flex-1 text-xs font-medium truncate" style={{ color: isSelected ? "#4F46E5" : "var(--foreground)" }}>
+                {asp.shortTitle}
               </div>
-              {/* chips */}
-              <div className="px-2.5 pb-2.5 flex flex-wrap gap-1">
-                {filledFields.map((f) => (
-                  <div key={f.key} className="rounded-lg px-1.5 py-0.5 flex items-center gap-1"
-                    style={{ background: f.color + "15", border: `1px solid ${f.color}30` }}>
-                    <span style={{ fontSize: 11 }}>{f.icon}</span>
-                    <span className="text-xs" style={{ color: "var(--foreground)" }}>{f.label}</span>
-                  </div>
+              <div className="flex gap-0.5 flex-shrink-0">
+                {filledCount > 0 && [0,1,2,3].map((fi) => (
+                  <div key={fi} className="w-1 h-1 rounded-full" style={{ background: fi < filledCount ? FIELDS[fi].color : "var(--border)" }} />
                 ))}
+                {isDived && <div className="ml-1 text-xs" style={{ color: "#22c55e" }}>✓</div>}
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Edit window */}
+      <div className="rounded-2xl overflow-hidden flex-shrink-0" style={{ border: "1px solid var(--border)", background: "var(--surface)" }}>
+        <div className="px-3 py-2.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)", background: selectedAsp.color + "08" }}>
+          <div className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>{selectedAsp.shortTitle}</div>
+          <div className="text-xs px-2 py-0.5 rounded-full" style={{ background: selectedAsp.color + "20", color: selectedAsp.color }}>
+            {MOCK_SCORES[selectedCode]}/10
+          </div>
+        </div>
+        <div className="p-3 grid grid-cols-2 gap-2">
+          {FIELDS.map((f) => (
+            <div key={f.key} className="rounded-xl p-2" style={{ background: f.color + "08", border: `1px solid ${f.color}25` }}>
+              <div className="flex items-center gap-1 mb-1">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: f.color }} />
+                <span className="text-xs font-semibold" style={{ color: f.color }}>{f.label}</span>
+              </div>
+              <div className="text-xs leading-relaxed" style={{ color: "var(--muted)", fontSize: 10 }}>
+                {(MOCK_FIELD_DATA[selectedCode] ?? []).includes(f.key) ? "Заполнено..." : "—"}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -238,22 +262,25 @@ function PanelStage3() {
         </div>
       </div>
 
-      {/* Strategy card */}
+      {/* Strategy cards */}
       <div className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <div className="px-4 py-2.5" style={{ borderBottom: "1px solid var(--border)" }}>
-          <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>Шаг 2 — Стратегия на 2 месяца</div>
-        </div>
-        <div className="px-4 py-2.5" style={{ borderBottom: "1px solid var(--border)" }}>
-          <div className="flex items-center gap-1.5 text-xs font-medium mb-1" style={{ color: "var(--foreground)" }}>
-            <span>🎯</span> Желаемый результат
+        <div className="px-3 py-2.5 flex items-center gap-2" style={{ borderBottom: "1px solid var(--border)" }}>
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#4F46E515" }}>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#4F46E5" strokeWidth="1.5"/><circle cx="8" cy="8" r="3.5" stroke="#4F46E5" strokeWidth="1.5"/><circle cx="8" cy="8" r="1" fill="#4F46E5"/></svg>
           </div>
-          <div className="text-xs" style={{ color: "var(--muted)" }}>К маю провести 3 мероприятия с участием учащихся…</div>
-        </div>
-        <div className="px-4 py-2.5">
-          <div className="flex items-center gap-1.5 text-xs font-medium mb-1" style={{ color: "var(--foreground)" }}>
-            <span>📋</span> Первые шаги на этой неделе
+          <div>
+            <div className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>Желаемый результат</div>
+            <div className="text-xs" style={{ color: "var(--muted)", fontSize: 10 }}>К маю провести 3 мероприятия…</div>
           </div>
-          <div className="text-xs" style={{ color: "var(--muted)" }}>1. Составить список инициатив… 2. Провести встречу…</div>
+        </div>
+        <div className="px-3 py-2.5 flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#22c55e15" }}>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#22c55e" strokeWidth="1.5"/><path d="M5 5h6M5 8h6M5 11h4" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          </div>
+          <div>
+            <div className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>Первые шаги на неделе</div>
+            <div className="text-xs" style={{ color: "var(--muted)", fontSize: 10 }}>1. Составить список… 2. Встреча…</div>
+          </div>
         </div>
       </div>
     </div>
@@ -281,15 +308,16 @@ function PanelReady() {
       {/* Score mini-map */}
       <div className="rounded-2xl p-3" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
         <div className="text-xs font-semibold mb-2" style={{ color: "var(--foreground)" }}>Карта оценок</div>
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5">
           {ASPECTS.map((asp) => {
             const score = MOCK_SCORES[asp.code];
             const color = getScoreColor(score);
             return (
-              <div key={asp.code} className="p-2 rounded-xl" style={{ background: asp.color + "12", border: `1px solid ${asp.color}30` }}>
-                <div className="text-sm font-bold mb-0.5" style={{ color }}>{score}</div>
-                <div className="leading-tight" style={{ color: "var(--muted)", fontSize: 9 }}>{asp.shortTitle}</div>
-                <div className="mt-1 h-0.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+              <div key={asp.code} className="p-2 rounded-xl flex items-center gap-2 relative" style={{ background: "var(--surface-2)", border: `1px solid var(--border)` }}>
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  style={{ background: color + "20", color }}>{score}</div>
+                <div className="text-xs leading-tight truncate" style={{ color: "var(--foreground)", fontSize: 9 }}>{asp.shortTitle}</div>
+                <div className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full" style={{ background: "var(--border)" }}>
                   <div style={{ width: `${(score / 10) * 100}%`, height: "100%", background: color, borderRadius: 9999 }} />
                 </div>
               </div>

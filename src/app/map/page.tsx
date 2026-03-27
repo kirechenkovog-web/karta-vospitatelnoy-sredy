@@ -99,7 +99,7 @@ function AspectCard({ aspect, score, isCompleted, onClick }: {
           className="font-semibold leading-snug pr-2 pt-1"
           style={{ color: isCompleted ? aspect.color : "var(--foreground)", fontSize: 13, maxWidth: "62%" }}
         >
-          {aspect.title}
+          {aspect.shortTitle}
         </div>
         {isCompleted && score?.score != null && (
           <ScoreCircle score={score.score} color={getScoreColor(score.score)} />
@@ -110,7 +110,7 @@ function AspectCard({ aspect, score, isCompleted, onClick }: {
         <img
           src={`/illustrations/${aspect.code}.png`}
           alt=""
-          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 6, ...(aspect.code === "professional_dev" ? { objectPosition: "center", transform: "scale(1.4)" } : {}) }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 6, ...(aspect.code === "professional_dev" ? { objectPosition: "left center" } : {}) }}
         />
       </div>
     </div>
