@@ -119,6 +119,12 @@ function Stage3Content({ session }: { session: Session }) {
             const isDived = deepDiveCodes.includes(asp.code);
             const isFocus = focusAspects.includes(asp.code);
             const isDisabled = !isFocus && focusAspects.length >= 2;
+            const dd = getDeepDive(asp.code);
+            const filledFields = FIELD_DEFS.filter((f) => {
+              const val = dd?.[f.key as keyof DeepDive];
+              return typeof val === "string" && val.trim();
+            });
+
             return (
               <button
                 key={asp.code}
@@ -150,6 +156,24 @@ function Stage3Content({ session }: { session: Session }) {
                     )}
                   </div>
                 </div>
+                {isDived && filledFields.length > 0 && (
+                  <div className="grid grid-cols-2 gap-1 mb-2">
+                    {filledFields.map((f) => {
+                      const val = (dd?.[f.key as keyof DeepDive] as string) ?? "";
+                      return (
+                        <div key={f.key} className="rounded-lg px-2 py-1.5" style={{ background: f.color + "10", border: `1px solid ${f.color}25` }}>
+                          <div className="flex items-center gap-1 mb-0.5">
+                            <FieldIcon fieldKey={f.key as FieldKey} color={f.color} size={10} />
+                            <span style={{ color: f.color, fontSize: 10, fontWeight: 600 }}>{f.label}</span>
+                          </div>
+                          <div className="leading-tight" style={{ color: "var(--muted)", fontSize: 10, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" }}>
+                            {val.trim().split("\n")[0].slice(0, 50)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-xl" style={{ background: scoreColor + "30" }}>
                   {scoreNum !== null && (
                     <div style={{ width: `${(scoreNum / 10) * 100}%`, height: "100%", background: scoreColor, borderRadius: "0 0 0 8px" }} />

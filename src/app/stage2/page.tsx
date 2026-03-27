@@ -227,6 +227,8 @@ function Stage2Content({ session }: { session: Session }) {
               const scoreNum = sc?.score ?? null;
               const scoreColor = scoreNum !== null ? getScoreColor(scoreNum) : "var(--muted)";
 
+              const filledFields = FIELDS.filter((f) => draftData[asp.code]?.[f.key]?.trim());
+
               return (
                 <button
                   key={asp.code}
@@ -256,6 +258,21 @@ function Stage2Content({ session }: { session: Session }) {
                       )}
                     </div>
                   </div>
+                  {dived && filledFields.length > 0 && (
+                    <div className="grid grid-cols-2 gap-1 mb-2">
+                      {filledFields.map((f) => (
+                        <div key={f.key} className="rounded-lg px-2 py-1.5" style={{ background: f.color + "10", border: `1px solid ${f.color}25` }}>
+                          <div className="flex items-center gap-1 mb-0.5">
+                            <FieldIcon fieldKey={f.key} color={f.color} size={10} />
+                            <span style={{ color: f.color, fontSize: 10, fontWeight: 600 }}>{f.label}</span>
+                          </div>
+                          <div className="leading-tight" style={{ color: "var(--muted)", fontSize: 10, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" }}>
+                            {draftData[asp.code][f.key].trim().split("\n")[0].slice(0, 50)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-xl" style={{ background: scoreColor + "30" }}>
                     {scoreNum !== null && (
                       <div style={{ width: `${(scoreNum / 10) * 100}%`, height: "100%", background: scoreColor, borderRadius: "0 0 0 8px" }} />
