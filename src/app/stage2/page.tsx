@@ -185,9 +185,9 @@ function Stage2Content({ session }: { session: Session }) {
   const aiNotes = selectedCode ? parseSavedNotes(getScore(selectedCode)?.tenOfTenText) : [];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       {/* Header */}
-      <div className="px-6 py-3 flex items-center justify-between flex-shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
+      <div className="px-6 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#4F46E5" }}>КВС</div>
           <StageNav currentStage={2} canGoStage2={true} canGoStage3={canGoStage3} />
@@ -208,7 +208,7 @@ function Stage2Content({ session }: { session: Session }) {
         </div>
       </div>
 
-      <div className="flex flex-col flex-1 overflow-y-auto px-6 py-4 gap-4">
+      <div className="flex flex-col px-6 py-4 gap-4">
         <div>
           <h1 className="text-xl font-bold mb-0.5" style={{ color: "var(--foreground)" }}>Этап 2 — Углублённый анализ</h1>
           <p className="text-xs" style={{ color: "var(--muted)" }}>Нажмите на аспект, чтобы заполнить данные.</p>
@@ -219,7 +219,7 @@ function Stage2Content({ session }: { session: Session }) {
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Выберите аспект для анализа</div>
           </div>
-          <div className="grid grid-cols-3 gap-2 overflow-y-auto" style={{ maxHeight: "38vh" }}>
+          <div className="grid grid-cols-3 gap-2">
             {ASPECTS.map((asp) => {
               const sc = getScore(asp.code);
               const dived = isDeepDived(asp.code);
