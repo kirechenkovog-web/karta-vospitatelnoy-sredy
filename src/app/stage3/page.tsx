@@ -35,10 +35,10 @@ function getScoreColor(score: number): string {
 }
 
 const DEEP_FIELDS = [
-  { key: "resultsText", label: "Результаты", icon: "📈", color: "#22c55e" },
-  { key: "resourcesText", label: "Ресурсы", icon: "🔧", color: "#4F46E5" },
-  { key: "challengesText", label: "Вызовы", icon: "⚡", color: "#ef4444" },
-  { key: "indicatorsText", label: "Индикаторы", icon: "🎯", color: "#f59e0b" },
+  { key: "resultsText", label: "Результаты", color: "#22c55e" },
+  { key: "resourcesText", label: "Ресурсы", color: "#4F46E5" },
+  { key: "challengesText", label: "Вызовы", color: "#ef4444" },
+  { key: "indicatorsText", label: "Индикаторы", color: "#f59e0b" },
 ] as const;
 
 function Stage3Content({ session, userName }: { session: Session; userName: string }) {
@@ -61,11 +61,11 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
     const asp = ASPECTS.find((a) => a.code === code);
     setFocusAspects((prev) => {
       if (prev.includes(code)) {
-        sendEvent(`[СОБЫТИЕ: Пользователь убрал аспект «${asp?.shortTitle}» из фокуса]`);
+        sendEvent(`[СОБЫТИЕ: Пользователь убрал аспект «${asp?.title}» из фокуса]`);
         return prev.filter((c) => c !== code);
       }
       if (prev.length >= 2) return prev;
-      sendEvent(`[СОБЫТИЕ: Пользователь выбрал аспект «${asp?.shortTitle}» как фокусный]`);
+      sendEvent(`[СОБЫТИЕ: Пользователь выбрал аспект «${asp?.title}» как фокусный]`);
       return [...prev, code];
     });
     onFocusInteract();
@@ -191,7 +191,7 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
                       {filledFields.map((f) => (
                         <div key={f.key} className="rounded-lg px-2 py-1 flex items-start gap-1.5"
                           style={{ background: f.color + "12", border: `1px solid ${f.color}25` }}>
-                          <span style={{ fontSize: 12 }}>{f.icon}</span>
+                          <div className="w-1.5 h-1.5 rounded-full mt-0.5 flex-shrink-0" style={{ background: f.color }} />
                           <span className="text-xs" style={{ color: "var(--foreground)" }}>
                             {(dd?.[f.key] ?? "").length > 70
                               ? (dd?.[f.key] ?? "").slice(0, 70) + "…"
@@ -211,57 +211,72 @@ function Stage3Content({ session, userName }: { session: Session; userName: stri
       </div>
 
       {/* ── Шаг 2: стратегическая карточка ──────────────────────────── */}
-      <div className="rounded-2xl mb-5 overflow-hidden"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
-        <div className="px-5 pt-4 pb-3" style={{ borderBottom: "1px solid var(--border)" }}>
-          <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Шаг 2 — Стратегия на 2 месяца</div>
-        </div>
-
+      <div className="flex flex-col gap-3 mb-5">
         {/* Желаемый результат */}
         <div
           id="target-result-field"
-          className={`px-5 py-4 transition-all ${targetH ? "ai-highlighted" : ""}`}
-          style={{ borderBottom: "1px solid var(--border)" }}
+          className={`rounded-2xl overflow-hidden transition-all ${targetH ? "ai-highlighted" : ""}`}
+          style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
           onClick={onTargetInteract}
         >
-          <label className="flex items-center gap-2 text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
-            <span>🎯</span>
-            <span>Желаемый результат</span>
-            <span className="text-xs font-normal" style={{ color: "#ef4444" }}>обязательно</span>
-          </label>
-          <p className="text-xs mb-2" style={{ color: "var(--muted)" }}>Конкретно и измеримо — что изменится за 2 месяца?</p>
-          <textarea
-            value={targetResult}
-            onChange={(e) => setTargetResult(e.target.value)}
-            onBlur={(e) => { if (e.target.value.trim()) sendEvent(`[СОБЫТИЕ: Пользователь сформулировал желаемый результат: «${e.target.value.trim()}»]`); }}
-            placeholder="Например: К маю провести 3 встречи с партнёрами и оформить одно соглашение"
-            rows={2}
-            className="w-full text-sm resize-none leading-relaxed"
-            style={{ background: "transparent", border: "none", color: "var(--foreground)" }}
-          />
+          <div className="px-5 pt-4 pb-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border)" }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#4F46E515" }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8" cy="8" r="7" stroke="#4F46E5" strokeWidth="1.5"/>
+                <circle cx="8" cy="8" r="3.5" stroke="#4F46E5" strokeWidth="1.5"/>
+                <circle cx="8" cy="8" r="1" fill="#4F46E5"/>
+              </svg>
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>Желаемый результат</div>
+              <div className="text-xs" style={{ color: "var(--muted)" }}>Конкретно и измеримо — что изменится за 2 месяца?</div>
+            </div>
+            <span className="text-xs" style={{ color: "#ef4444" }}>обязательно</span>
+          </div>
+          <div className="px-5 py-3">
+            <textarea
+              value={targetResult}
+              onChange={(e) => setTargetResult(e.target.value)}
+              onBlur={(e) => { if (e.target.value.trim()) sendEvent(`[СОБЫТИЕ: Пользователь сформулировал желаемый результат: «${e.target.value.trim()}»]`); }}
+              placeholder="Например: К маю провести 3 встречи с партнёрами и оформить одно соглашение"
+              rows={2}
+              className="w-full text-sm resize-none leading-relaxed"
+              style={{ background: "transparent", border: "none", color: "var(--foreground)", outline: "none" }}
+            />
+          </div>
         </div>
 
         {/* Первые шаги */}
         <div
           id="first-steps-field"
-          className={`px-5 py-4 transition-all ${firstStepsH ? "ai-highlighted" : ""}`}
+          className={`rounded-2xl overflow-hidden transition-all ${firstStepsH ? "ai-highlighted" : ""}`}
+          style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}
           onClick={onFirstStepsInteract}
         >
-          <label className="flex items-center gap-2 text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
-            <span>📋</span>
-            <span>Первые шаги на этой неделе</span>
-            <span className="text-xs font-normal" style={{ color: "#ef4444" }}>обязательно</span>
-          </label>
-          <p className="text-xs mb-2" style={{ color: "var(--muted)" }}>Конкретные действия, которые можно начать прямо сейчас</p>
-          <textarea
-            value={firstSteps}
-            onChange={(e) => setFirstSteps(e.target.value)}
-            onBlur={(e) => { if (e.target.value.trim()) sendEvent(`[СОБЫТИЕ: Пользователь описал первые шаги на неделю: «${e.target.value.trim()}»]`); }}
-            placeholder="1. Составить список... 2. Написать письмо..."
-            rows={3}
-            className="w-full text-sm resize-none leading-relaxed"
-            style={{ background: "transparent", border: "none", color: "var(--foreground)" }}
-          />
+          <div className="px-5 pt-4 pb-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border)" }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#22c55e15" }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="12" height="12" rx="2" stroke="#22c55e" strokeWidth="1.5"/>
+                <path d="M5 5h6M5 8h6M5 11h4" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>Первые шаги на этой неделе</div>
+              <div className="text-xs" style={{ color: "var(--muted)" }}>Конкретные действия, которые можно начать прямо сейчас</div>
+            </div>
+            <span className="text-xs" style={{ color: "#ef4444" }}>обязательно</span>
+          </div>
+          <div className="px-5 py-3">
+            <textarea
+              value={firstSteps}
+              onChange={(e) => setFirstSteps(e.target.value)}
+              onBlur={(e) => { if (e.target.value.trim()) sendEvent(`[СОБЫТИЕ: Пользователь описал первые шаги на неделю: «${e.target.value.trim()}»]`); }}
+              placeholder="1. Составить список... 2. Написать письмо..."
+              rows={3}
+              className="w-full text-sm resize-none leading-relaxed"
+              style={{ background: "transparent", border: "none", color: "var(--foreground)", outline: "none" }}
+            />
+          </div>
         </div>
       </div>
 
@@ -308,11 +323,11 @@ export default function Stage3Page() {
               .filter((s: AspectScore) => s.score != null)
               .map((s: AspectScore) => {
                 const asp = ASPECTS.find((a) => a.code === s.aspectCode);
-                return `${asp?.shortTitle ?? s.aspectCode}: ${s.score}/10`;
+                return `${asp?.title ?? s.aspectCode}: ${s.score}/10`;
               });
             const divedTitles = (full.deepDives ?? []).map((dd: { aspectCode: string }) => {
               const asp = ASPECTS.find((a) => a.code === dd.aspectCode);
-              return asp?.shortTitle ?? dd.aspectCode;
+              return asp?.title ?? dd.aspectCode;
             });
             setSessionContext(`Оценки: ${lines.join(", ")}. Углублённый анализ по: ${divedTitles.join(", ")}.`);
             setSession(full);

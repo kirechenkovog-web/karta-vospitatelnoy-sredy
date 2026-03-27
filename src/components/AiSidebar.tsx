@@ -9,6 +9,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   isEvent?: boolean;
+  buttonLabel?: string;
 }
 
 interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
@@ -21,6 +22,7 @@ interface AiSidebarProps {
   sessionContext?: string;
   onScoreSuggested?: (score: number) => void;
   onNotesUpdated?: (notes: NoteItem[]) => void;
+  onChatButton?: () => void;
 }
 
 const MIN_WIDTH = 44;
@@ -35,6 +37,7 @@ export default function AiSidebar({
   sessionContext,
   onScoreSuggested,
   onNotesUpdated,
+  onChatButton,
 }: AiSidebarProps) {
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [collapsed, setCollapsed] = useState(false);
@@ -53,6 +56,7 @@ export default function AiSidebar({
   const messagesRef = useRef(messages);
   const onScoreSuggestedRef = useRef(onScoreSuggested);
   const onNotesUpdatedRef = useRef(onNotesUpdated);
+  const onChatButtonRef = useRef(onChatButton);
 
   sessionRef.current = sessionId;
   stageRef.current = stage;
@@ -61,8 +65,9 @@ export default function AiSidebar({
   messagesRef.current = messages;
   onScoreSuggestedRef.current = onScoreSuggested;
   onNotesUpdatedRef.current = onNotesUpdated;
+  onChatButtonRef.current = onChatButton;
 
-  function handleAiResponse(data: { reply?: string; error?: string; highlightId?: string; suggestedScore?: number; noteItems?: NoteItem[] }) {
+  function handleAiResponse(data: { reply?: string; error?: string; highlightId?: string; suggestedScore?: number; noteItems?: NoteItem[]; buttonLabel?: string }): { reply: string; buttonLabel?: string } {
     const reply = data.reply || data.error || "Ошибка";
     if (data.highlightId) setHighlight(data.highlightId);
     if (data.suggestedScore !== null && data.suggestedScore !== undefined) {
@@ -71,7 +76,7 @@ export default function AiSidebar({
     if (data.noteItems && data.noteItems.length > 0) {
       onNotesUpdatedRef.current?.(data.noteItems);
     }
-    return reply;
+    return { reply, buttonLabel: data.buttonLabel ?? undefined };
   }
 
   // Drag-to-resize
@@ -141,8 +146,8 @@ export default function AiSidebar({
       setLoading(true);
       try {
         const data = await callChat(eventText, updatedHistory, false);
-        const reply = handleAiResponse(data);
-        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+        const { reply, buttonLabel } = handleAiResponse(data);
+        setMessages((prev) => [...prev, { role: "assistant", content: reply, buttonLabel }]);
       } catch {
         // silent fail for events
       } finally {
@@ -167,8 +172,8 @@ export default function AiSidebar({
       try {
         const data = await callChat(autoTrigger, messagesRef.current, true);
         if (cancelled) return;
-        const reply = handleAiResponse(data);
-        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+        const { reply, buttonLabel } = handleAiResponse(data);
+        setMessages((prev) => [...prev, { role: "assistant", content: reply, buttonLabel }]);
         // Fallback highlights if AI didn't send one
         if (!data.highlightId) {
           const fallback =
@@ -203,8 +208,8 @@ export default function AiSidebar({
 
     try {
       const data = await callChat(text, newMessages, false);
-      const reply = handleAiResponse(data);
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      const { reply, buttonLabel } = handleAiResponse(data);
+      setMessages((prev) => [...prev, { role: "assistant", content: reply, buttonLabel }]);
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Ошибка соединения." }]);
     } finally {
@@ -289,6 +294,15 @@ export default function AiSidebar({
                       borderRadius: msg.role === "assistant" ? "4px 14px 14px 14px" : "14px 4px 14px 14px",
                     }}
                   >
+                    {msg.role === "assistant" && msg.buttonLabel && (
+                      <button
+                        onClick={() => onChatButtonRef.current?.()}
+                        className="mt-2 w-full py-2 px-3 rounded-lg text-sm font-medium transition-opacity hover:opacity-80 text-white"
+                        style={{ background: "#22c55e", border: "none", cursor: "pointer", display: "block" }}
+                      >
+                        ✓ {msg.buttonLabel}
+                      </button>
+                    )}
                     {msg.role === "assistant" ? (
                       <ReactMarkdown
                         components={{

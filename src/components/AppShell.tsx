@@ -19,6 +19,7 @@ interface AppShellProps {
   children: ReactNode;
   onScoreSuggested?: (score: number) => void;
   onNotesUpdated?: (notes: NoteItem[]) => void;
+  onChatButton?: () => void;
 }
 
 export default function AppShell({
@@ -31,6 +32,7 @@ export default function AppShell({
   children,
   onScoreSuggested,
   onNotesUpdated,
+  onChatButton,
 }: AppShellProps) {
   return (
     <AiEventProvider>
@@ -56,6 +58,7 @@ export default function AppShell({
               sessionContext={sessionContext}
               onScoreSuggested={onScoreSuggested}
               onNotesUpdated={onNotesUpdated}
+              onChatButton={onChatButton}
             />
 
             {/* Main scrollable content */}

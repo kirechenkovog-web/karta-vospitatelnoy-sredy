@@ -97,9 +97,9 @@ function AspectCard({ aspect, score, isCompleted, onClick }: {
       <div className="flex items-start justify-between px-3 pt-2" style={{ minHeight: 60 }}>
         <div
           className="font-semibold leading-snug pr-2 pt-1"
-          style={{ color: isCompleted ? aspect.color : "var(--foreground)", fontSize: 15, maxWidth: "62%" }}
+          style={{ color: isCompleted ? aspect.color : "var(--foreground)", fontSize: 13, maxWidth: "62%" }}
         >
-          {aspect.shortTitle}
+          {aspect.title}
         </div>
         {isCompleted && score?.score != null && (
           <ScoreCircle score={score.score} color={getScoreColor(score.score)} />
@@ -110,7 +110,7 @@ function AspectCard({ aspect, score, isCompleted, onClick }: {
         <img
           src={`/illustrations/${aspect.code}.png`}
           alt=""
-          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 6 }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 6, ...(aspect.code === "professional_dev" ? { objectPosition: "center", transform: "scale(1.4)" } : {}) }}
         />
       </div>
     </div>
@@ -157,6 +157,7 @@ function InlineAspectView({
   initialScore,
   suggestedScore,
   aiNotes,
+  triggerSave,
   onClose,
   onSaved,
 }: {
@@ -165,6 +166,7 @@ function InlineAspectView({
   initialScore: AspectScore | undefined;
   suggestedScore: number | null;
   aiNotes: NoteItem[];
+  triggerSave?: number;
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
@@ -186,6 +188,11 @@ function InlineAspectView({
       setScore(suggestedScore);
     }
   }, [suggestedScore]);
+
+  // Trigger save from [BUTTON] in chat
+  useEffect(() => {
+    if (triggerSave) handleSave();
+  }, [triggerSave]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSave() {
     if (score === null) return;
@@ -409,6 +416,7 @@ function MapPageInner() {
   const [hasOpenedAspect, setHasOpenedAspect] = useState(false);
   const [suggestedScores, setSuggestedScores] = useState<Record<string, number>>({});
   const [aiNotes, setAiNotes] = useState<Record<string, NoteItem[]>>({});
+  const [triggerSave, setTriggerSave] = useState(0);
 
   const openAspectRef = useRef<string | null>(null);
   openAspectRef.current = openAspect;
@@ -484,7 +492,7 @@ function MapPageInner() {
     if (!completed.length) return undefined;
     const lines = completed.map((s) => {
       const asp = ASPECTS.find((a) => a.code === s.aspectCode);
-      return `${asp?.shortTitle ?? s.aspectCode}: ${s.score}/10`;
+      return `${asp?.title ?? s.aspectCode}: ${s.score}/10`;
     });
     return `Оценено ${completed.length}/12 аспектов. ${lines.join(", ")}.`;
   }, [session]);
@@ -516,6 +524,7 @@ function MapPageInner() {
       sessionContext={sessionContext}
       onScoreSuggested={handleScoreSuggested}
       onNotesUpdated={handleNotesUpdated}
+      onChatButton={() => setTriggerSave((p) => p + 1)}
       header={<div />}
     >
       {openAspect ? (
@@ -525,6 +534,7 @@ function MapPageInner() {
           initialScore={initialScore}
           suggestedScore={suggestedScores[openAspect] ?? null}
           aiNotes={aiNotes[openAspect] ?? []}
+          triggerSave={triggerSave}
           onClose={handleCloseAspect}
           onSaved={async () => {
             await refreshSession();
