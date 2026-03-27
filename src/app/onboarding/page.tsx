@@ -153,32 +153,14 @@ function PanelReady() {
 
 function PanelIntro() {
   return (
-    <div
-      className="h-full flex flex-col items-center justify-center px-10 gap-10"
-      style={{ background: "linear-gradient(160deg, #f8f7ff 0%, #f0effe 60%, #e8e5fd 100%)" }}
-    >
-      {/* Brand icon */}
-      <div className="flex flex-col items-center gap-4">
-        <div
-          className="w-20 h-20 rounded-3xl flex items-center justify-center flex-shrink-0"
-          style={{
-            background: "linear-gradient(135deg, #6366f1 0%, #4F46E5 100%)",
-            color: "#fff",
-            fontSize: 36,
-            boxShadow: "0 8px 32px #4F46E540",
-          }}
-        >
-          ✦
+    <div className="h-full flex flex-col items-center justify-center px-10 gap-8">
+      {/* Title block */}
+      <div className="text-center">
+        <div className="text-3xl font-bold mb-2 leading-snug" style={{ color: "var(--foreground)" }}>
+          Карта воспитательной среды
         </div>
-
-        {/* Title block */}
-        <div className="text-center">
-          <div className="text-3xl font-bold mb-2 leading-snug" style={{ color: "#1e1b4b" }}>
-            Карта воспитательной среды
-          </div>
-          <div className="text-sm leading-relaxed" style={{ color: "#6b7280" }}>
-            Инструмент самодиагностики для советника директора по воспитанию
-          </div>
+        <div className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+          Инструмент самодиагностики для советника директора по воспитанию
         </div>
       </div>
 
@@ -209,7 +191,7 @@ function PanelIntro() {
       </div>
 
       {/* Time */}
-      <div className="flex items-center gap-2 text-sm" style={{ color: "#9ca3af" }}>
+      <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--muted)" }}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5"/>
           <path d="M7 4v3.5l2 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
