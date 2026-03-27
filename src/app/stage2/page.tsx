@@ -231,27 +231,35 @@ function Stage2Content({ session }: { session: Session }) {
                 <button
                   key={asp.code}
                   onClick={() => handleSelectAspect(asp.code)}
-                  className="p-2.5 rounded-xl text-left transition-all"
+                  className="p-3 rounded-xl text-left transition-all relative overflow-hidden"
                   style={{
-                    background: isSelected ? "#4F46E510" : dived ? "var(--surface-2)" : "transparent",
-                    border: isSelected ? "2px solid #4F46E5" : `1px solid ${dived ? "#4F46E530" : "var(--border)"}`,
+                    background: isSelected ? "#4F46E508" : "var(--surface)",
+                    border: isSelected ? "2px solid #4F46E5" : "1px solid var(--border)",
                     cursor: "pointer",
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold truncate" style={{ color: isSelected ? "#4F46E5" : "var(--foreground)" }}>
-                      {asp.shortTitle}
-                    </span>
-                    <span className="text-xs font-bold ml-1 flex-shrink-0" style={{ color: scoreColor }}>
+                  <div className="flex items-center gap-2.5 pb-2">
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+                      style={{ background: scoreColor + "20", color: scoreColor }}
+                    >
                       {scoreNum ?? "—"}
-                    </span>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold truncate" style={{ color: isSelected ? "#4F46E5" : "var(--foreground)" }}>
+                        {asp.shortTitle}
+                      </div>
+                      {(isSelected || dived) && (
+                        <div className="text-xs" style={{ color: isSelected ? "#4F46E5" : "#22c55e" }}>
+                          {isSelected ? "✓ открыт" : "✓ заполнен"}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-0.5" style={{ fontSize: 10, color: "var(--muted)" }}>
-                    {isSelected
-                      ? <span style={{ color: "#4F46E5" }}>✓ открыт</span>
-                      : dived
-                      ? <span style={{ color: "#22c55e" }}>✓ заполнен</span>
-                      : null}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-xl" style={{ background: scoreColor + "30" }}>
+                    {scoreNum !== null && (
+                      <div style={{ width: `${(scoreNum / 10) * 100}%`, height: "100%", background: scoreColor, borderRadius: "0 0 0 8px" }} />
+                    )}
                   </div>
                 </button>
               );

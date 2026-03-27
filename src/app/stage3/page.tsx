@@ -124,26 +124,36 @@ function Stage3Content({ session }: { session: Session }) {
                 key={asp.code}
                 onClick={() => !isDisabled && toggleFocus(asp.code)}
                 disabled={isDisabled}
-                className="p-2.5 rounded-xl text-left transition-all"
+                className="p-3 rounded-xl text-left transition-all relative overflow-hidden"
                 style={{
-                  background: isFocus ? "#4F46E510" : isDived ? "var(--surface-2)" : "transparent",
-                  border: isFocus ? "2px solid #4F46E5" : `1px solid ${isDived ? "#4F46E530" : "var(--border)"}`,
+                  background: isFocus ? "#4F46E508" : "var(--surface)",
+                  border: isFocus ? "2px solid #4F46E5" : "1px solid var(--border)",
                   opacity: isDisabled ? 0.35 : 1,
                   cursor: isDisabled ? "not-allowed" : "pointer",
                 }}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold truncate" style={{ color: isFocus ? "#4F46E5" : "var(--foreground)" }}>
-                    {asp.shortTitle}
-                  </span>
-                  <span className="text-xs font-bold ml-1 flex-shrink-0" style={{ color: scoreColor }}>
+                <div className="flex items-center gap-2.5 pb-2">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    style={{ background: scoreColor + "20", color: scoreColor }}
+                  >
                     {scoreNum ?? "—"}
-                  </span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold truncate" style={{ color: isFocus ? "#4F46E5" : "var(--foreground)" }}>
+                      {asp.shortTitle}
+                    </div>
+                    {(isFocus || isDived) && (
+                      <div className="text-xs" style={{ color: isFocus ? "#4F46E5" : "#6366f180" }}>
+                        {isFocus ? "✓ выбран" : "углублён"}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-0.5 text-xs" style={{ color: "var(--muted)", fontSize: 10 }}>
-                  {isFocus ? <span style={{ color: "#4F46E5" }}>✓ выбран</span>
-                    : isDived ? <span style={{ color: "#4F46E580" }}>углублён</span>
-                    : null}
+                <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-xl" style={{ background: scoreColor + "30" }}>
+                  {scoreNum !== null && (
+                    <div style={{ width: `${(scoreNum / 10) * 100}%`, height: "100%", background: scoreColor, borderRadius: "0 0 0 8px" }} />
+                  )}
                 </div>
               </button>
             );
