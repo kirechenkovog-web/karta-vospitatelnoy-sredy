@@ -26,23 +26,6 @@ const MOCK_SCORES: Record<string, number> = {
   initiatives_center: 6, collectives: 5, grants: 3, professional_dev: 7,
 };
 
-const MOCK_DIVES = ["social_partners", "teachers", "students_involvement", "competitions", "parents", "professional_dev"];
-
-const FIELDS = [
-  { key: "resultsText", label: "Результаты", icon: "📈", color: "#22c55e" },
-  { key: "resourcesText", label: "Ресурсы", icon: "🔧", color: "#4F46E5" },
-  { key: "challengesText", label: "Вызовы", icon: "⚡", color: "#ef4444" },
-  { key: "indicatorsText", label: "Индикаторы", icon: "🎯", color: "#f59e0b" },
-] as const;
-
-const MOCK_FIELD_DATA: Record<string, string[]> = {
-  social_partners: ["resultsText", "resourcesText"],
-  teachers: ["resultsText", "challengesText"],
-  students_involvement: ["resultsText", "resourcesText", "challengesText", "indicatorsText"],
-  competitions: ["resultsText"],
-  parents: ["resourcesText", "indicatorsText"],
-  professional_dev: ["resultsText", "indicatorsText"],
-};
 
 function getScoreColor(score: number) {
   if (score >= 8) return "#22c55e";
@@ -97,55 +80,9 @@ const STEPS: StepConfig[] = [
 // ─── Right panel: Stage 1 (aspect grid) ──────────────────────────────────────
 
 function PanelAspects() {
-  const [visibleCount, setVisibleCount] = useState(0);
-
-  useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setVisibleCount(i);
-      if (i >= ASPECTS.length) clearInterval(interval);
-    }, 70);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="flex flex-col h-full overflow-auto p-4">
-      <div className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: "var(--muted)" }}>
-        <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: "#4F46E5" }}>1</span>
-        Этап 1 — Оценка аспектов
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {ASPECTS.map((asp, i) => (
-          <div
-            key={asp.code}
-            className="rounded-2xl overflow-hidden"
-            style={{
-              background: "white",
-              border: `2px solid ${asp.color}50`,
-              height: 130,
-              display: "flex",
-              flexDirection: "column",
-              opacity: i < visibleCount ? 1 : 0,
-              transform: i < visibleCount ? "translateY(0)" : "translateY(8px)",
-              transition: "opacity 0.25s ease, transform 0.25s ease",
-              boxShadow: `0 2px 8px ${asp.color}15`,
-            }}
-          >
-            <div style={{ height: 2, background: asp.color, flexShrink: 0 }} />
-            <div className="px-2.5 pt-1.5 pb-0 font-semibold leading-tight" style={{ color: asp.color, fontSize: 11 }}>
-              {asp.shortTitle}
-            </div>
-            <div style={{ flex: 1, padding: "4px 6px 6px", overflow: "hidden" }}>
-              <img
-                src={`/illustrations/square/${asp.code}.png`}
-                alt=""
-                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 4 }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="flex h-full overflow-hidden">
+      <img src="/onboarding/Stsge1.png" alt="Этап 1 — Оценка карты" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top left" }} />
     </div>
   );
 }
@@ -153,66 +90,9 @@ function PanelAspects() {
 // ─── Right panel: Stage 2 (grid + edit window) ────────────────────────────────
 
 function PanelStage2() {
-  const selectedCode = "students_involvement";
-  const selectedAsp = ASPECTS.find((a) => a.code === selectedCode)!;
-
   return (
-    <div className="flex flex-col h-full overflow-auto p-4 gap-3">
-      <div className="text-xs font-semibold flex items-center gap-2" style={{ color: "var(--muted)" }}>
-        <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: "#4F46E5" }}>2</span>
-        Этап 2 — Углублённый анализ
-      </div>
-
-      {/* Aspect grid */}
-      <div className="p-3 rounded-2xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <div className="text-xs font-medium mb-2" style={{ color: "var(--foreground)" }}>Выберите аспект для анализа</div>
-        <div className="grid grid-cols-3 gap-1.5">
-          {ASPECTS.map((asp) => {
-            const score = MOCK_SCORES[asp.code];
-            const scoreColor = getScoreColor(score);
-            const isSelected = asp.code === selectedCode;
-            const isDived = MOCK_DIVES.includes(asp.code);
-            return (
-              <div key={asp.code} className="p-2 rounded-xl"
-                style={{
-                  background: isSelected ? "#4F46E510" : isDived ? "var(--surface-2)" : "transparent",
-                  border: isSelected ? "2px solid #4F46E5" : `1px solid ${isDived ? "#4F46E530" : "var(--border)"}`,
-                }}>
-                <div className="flex items-center justify-between">
-                  <span className="truncate font-semibold" style={{ color: isSelected ? "#4F46E5" : "var(--foreground)", fontSize: 10 }}>{asp.shortTitle}</span>
-                  <span className="font-bold ml-1 flex-shrink-0" style={{ color: scoreColor, fontSize: 10 }}>{score}</span>
-                </div>
-                <div style={{ fontSize: 9, color: isSelected ? "#4F46E5" : isDived ? "#22c55e" : "transparent" }}>
-                  {isSelected ? "✓ открыт" : isDived ? "✓ заполнен" : "·"}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Edit window */}
-      <div className="rounded-2xl overflow-hidden flex-shrink-0" style={{ border: "1px solid var(--border)", background: "var(--surface)" }}>
-        <div className="px-3 py-2.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)", background: selectedAsp.color + "08" }}>
-          <div className="text-xs font-bold" style={{ color: "var(--foreground)" }}>{selectedAsp.title}</div>
-          <div className="text-xs px-2 py-0.5 rounded-full" style={{ background: selectedAsp.color + "20", color: selectedAsp.color }}>
-            {MOCK_SCORES[selectedCode]}/10
-          </div>
-        </div>
-        <div className="p-3 grid grid-cols-2 gap-2">
-          {FIELDS.map((f) => (
-            <div key={f.key} className="rounded-xl p-2" style={{ background: f.color + "08", border: `1px solid ${f.color}25` }}>
-              <div className="flex items-center gap-1 mb-1">
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: f.color }} />
-                <span className="text-xs font-semibold" style={{ color: f.color }}>{f.label}</span>
-              </div>
-              <div className="text-xs" style={{ color: "var(--muted)", fontSize: 10 }}>
-                {(MOCK_FIELD_DATA[selectedCode] ?? []).includes(f.key) ? "Заполнено..." : "—"}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="flex h-full overflow-hidden">
+      <img src="/onboarding/Stage2.png" alt="Этап 2 — Углублённый анализ" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top left" }} />
     </div>
   );
 }
@@ -220,68 +100,9 @@ function PanelStage2() {
 // ─── Right panel: Stage 3 (focus + strategy) ─────────────────────────────────
 
 function PanelStage3() {
-  const focusAspects = ["students_involvement", "competitions"];
-
   return (
-    <div className="flex flex-col h-full overflow-auto p-4 gap-3">
-      <div className="text-xs font-semibold flex items-center gap-2" style={{ color: "var(--muted)" }}>
-        <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: "#4F46E5" }}>3</span>
-        Этап 3 — Фокус и стратегия
-      </div>
-
-      {/* Focus selector */}
-      <div className="p-3 rounded-2xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>Шаг 1 — Фокусные аспекты</div>
-          <div className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: "var(--surface-2)", color: "var(--muted)" }}>2/2 выбрано</div>
-        </div>
-        <div className="grid grid-cols-3 gap-1.5">
-          {ASPECTS.map((asp) => {
-            const score = MOCK_SCORES[asp.code];
-            const scoreColor = getScoreColor(score);
-            const isFocus = focusAspects.includes(asp.code);
-            const isDived = MOCK_DIVES.includes(asp.code);
-            return (
-              <div key={asp.code} className="p-2 rounded-xl"
-                style={{
-                  background: isFocus ? "#4F46E510" : isDived ? "var(--surface-2)" : "transparent",
-                  border: isFocus ? "2px solid #4F46E5" : `1px solid ${isDived ? "#4F46E530" : "var(--border)"}`,
-                  opacity: !isFocus && !isDived ? 0.5 : 1,
-                }}>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold truncate" style={{ color: isFocus ? "#4F46E5" : "var(--foreground)", fontSize: 10 }}>{asp.shortTitle}</span>
-                  <span className="text-xs font-bold ml-1 flex-shrink-0" style={{ color: scoreColor, fontSize: 10 }}>{score}</span>
-                </div>
-                {isFocus && <div className="text-xs mt-0.5" style={{ color: "#4F46E5", fontSize: 9 }}>✓ выбран</div>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Per-aspect strategy cards */}
-      {focusAspects.map((code) => {
-        const asp = ASPECTS.find((a) => a.code === code)!;
-        const score = MOCK_SCORES[code];
-        const scoreColor = getScoreColor(score);
-        return (
-          <div key={code} className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: `1px solid ${scoreColor}40` }}>
-            <div className="px-3 py-2 flex items-center gap-2" style={{ borderBottom: "1px solid var(--border)", background: scoreColor + "08" }}>
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
-                style={{ background: scoreColor + "20", color: scoreColor }}>{score}</div>
-              <div className="text-xs font-bold" style={{ color: "var(--foreground)" }}>{asp.shortTitle}</div>
-            </div>
-            <div className="px-3 pt-2 pb-1" style={{ borderBottom: "1px solid var(--border)" }}>
-              <div className="text-xs font-semibold mb-0.5" style={{ color: "var(--foreground)" }}>Желаемый результат</div>
-              <div style={{ fontSize: 10, color: "var(--muted)" }}>Конкретно и измеримо — что изменится…</div>
-            </div>
-            <div className="px-3 pt-2 pb-2.5">
-              <div className="text-xs font-semibold mb-0.5" style={{ color: "var(--foreground)" }}>Первые шаги</div>
-              <div style={{ fontSize: 10, color: "var(--muted)" }}>1. Составить список… 2. Написать…</div>
-            </div>
-          </div>
-        );
-      })}
+    <div className="flex h-full overflow-hidden">
+      <img src="/onboarding/Stage3.png" alt="Этап 3 — Фокус и стратегия" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top left" }} />
     </div>
   );
 }
