@@ -8,41 +8,14 @@ import StageNav from "@/components/StageNav";
 import { useHighlightedElement } from "@/contexts/HighlightContext";
 import { useAiEvent } from "@/contexts/AiEventContext";
 import { FieldIcon, DEEP_FIELDS as FIELD_DEFS, type FieldKey } from "@/components/FieldIcons";
+import type { AspectScore, DeepDive, FocusPlan } from "@/types";
+import { getScoreColor, parseJsonMap } from "@/lib/utils";
 
-interface AspectScore { aspectCode: string; score: number | null; }
-interface DeepDive {
-  aspectCode: string;
-  resultsText: string | null;
-  resourcesText: string | null;
-  challengesText: string | null;
-  indicatorsText: string | null;
-}
 interface Session {
   id: string;
   scores: AspectScore[];
   deepDives: DeepDive[];
-  focusPlan: {
-    focusAspects: string;
-    targetResult: string | null;
-    crossResourcesText: string | null;
-    firstStepsText: string | null;
-  } | null;
-}
-
-function getScoreColor(score: number): string {
-  if (score >= 8) return "#22c55e";
-  if (score >= 5) return "#eab308";
-  return "#ef4444";
-}
-
-function parseJsonMap(s: string | null): Record<string, string> {
-  if (!s) return {};
-  try {
-    const p = JSON.parse(s);
-    return typeof p === "object" && !Array.isArray(p) ? p : {};
-  } catch {
-    return {};
-  }
+  focusPlan: FocusPlan | null;
 }
 
 function Stage3Content({ session }: { session: Session }) {

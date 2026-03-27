@@ -8,40 +8,14 @@ import AppShell from "@/components/AppShell";
 import StageNav from "@/components/StageNav";
 import { useHighlightedElement } from "@/contexts/HighlightContext";
 import { useAiEvent } from "@/contexts/AiEventContext";
-
-interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
-
-interface AspectScore {
-  aspectCode: string;
-  score: number | null;
-  tenOfTenText: string | null;
-  currentStateText: string | null;
-  status: string;
-}
+import type { NoteItem, AspectScore } from "@/types";
+import { getScoreColor, parseSavedNotes } from "@/lib/utils";
 
 interface Session {
   id: string;
   currentStage: number;
   scores: AspectScore[];
   deepDives: { aspectCode: string }[];
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function getScoreColor(score: number): string {
-  if (score >= 8) return "#22c55e";
-  if (score >= 5) return "#eab308";
-  return "#ef4444";
-}
-
-function parseSavedNotes(tenOfTenText: string | null | undefined): NoteItem[] {
-  if (!tenOfTenText) return [];
-  try {
-    const parsed = JSON.parse(tenOfTenText);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
 }
 
 // ─── Score circle ─────────────────────────────────────────────────────────────
@@ -433,24 +407,18 @@ function MapPageInner() {
     }
 
     const sessionPromise = sessionIdParam
-      ? fetch(`/api/session?sessionId=${sessionIdParam}`).then((r) => r.json()).then((d) => ({ session: d }))
+      ? fetch(`/api/session?sessionId=${sessionIdParam}`).then((r) => r.json())
       : fetch("/api/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ forceNew: isNew }),
-        }).then((r) => r.json());
+        }).then((r) => r.json()).then((d) => d.session ?? d);
 
     sessionPromise
-      .then((sessionData) => {
-        if (sessionData.error) { router.push("/login"); return; }
-        const sid = sessionIdParam ? sessionIdParam : sessionData.session.id;
-        return fetch(`/api/session?sessionId=${sid}`)
-          .then((r) => r.json())
-          .then((full) => {
-            if (full.error) { router.push("/login"); return; }
-            setSession(full);
-            if (isNew) router.replace("/map");
-          });
+      .then((data) => {
+        if (!data || data.error) { router.push("/login"); return; }
+        setSession(data);
+        if (isNew) router.replace("/map");
       })
       .catch(() => router.push("/login"))
       .finally(() => setLoading(false));

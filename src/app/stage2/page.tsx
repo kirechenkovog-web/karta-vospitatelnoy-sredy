@@ -9,21 +9,8 @@ import StageNav from "@/components/StageNav";
 import { useHighlightedElement } from "@/contexts/HighlightContext";
 import { useAiEvent } from "@/contexts/AiEventContext";
 import { FieldIcon, DEEP_FIELDS as FIELD_DEFS, type FieldKey } from "@/components/FieldIcons";
-
-interface DeepDive {
-  aspectCode: string;
-  resultsText: string | null;
-  resourcesText: string | null;
-  challengesText: string | null;
-  indicatorsText: string | null;
-}
-
-interface AspectScore {
-  aspectCode: string;
-  score: number | null;
-  status: string;
-  tenOfTenText: string | null;
-}
+import type { NoteItem, AspectScore, DeepDive } from "@/types";
+import { getScoreColor, parseSavedNotes } from "@/lib/utils";
 
 interface Session {
   id: string;
@@ -31,30 +18,12 @@ interface Session {
   deepDives: DeepDive[];
 }
 
-interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
-
 const FIELDS = [
   { key: "resultsText" as FieldKey, id: "results-field", label: "Результаты", desc: "Что уже достигнуто", color: "#22c55e" },
   { key: "resourcesText" as FieldKey, id: "resources-field", label: "Ресурсы", desc: "Что есть в наличии: люди, связи, время", color: "#4F46E5" },
   { key: "challengesText" as FieldKey, id: "challenges-field", label: "Вызовы", desc: "Что создаёт трудности, что мешает", color: "#ef4444" },
   { key: "indicatorsText" as FieldKey, id: "indicators-field", label: "Индикаторы достижения цели", desc: "Как поймёте, что стало лучше?", color: "#f59e0b" },
 ];
-
-function getScoreColor(score: number): string {
-  if (score >= 8) return "#22c55e";
-  if (score >= 5) return "#eab308";
-  return "#ef4444";
-}
-
-function parseSavedNotes(tenOfTenText: string | null | undefined): NoteItem[] {
-  if (!tenOfTenText) return [];
-  try {
-    const parsed = JSON.parse(tenOfTenText);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
 
 // ─── Field block ─────────────────────────────────────────────────────────────
 

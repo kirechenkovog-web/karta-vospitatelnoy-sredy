@@ -5,53 +5,16 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ASPECTS } from "@/data/aspects";
 import { FieldIcon, type FieldKey } from "@/components/FieldIcons";
-
-interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
-
-interface AspectScore {
-  aspectCode: string;
-  score: number | null;
-  tenOfTenText: string | null;
-  currentStateText: string | null;
-  status: string;
-}
-
-interface DeepDive {
-  aspectCode: string;
-  resultsText: string | null;
-  resourcesText: string | null;
-  challengesText: string | null;
-  indicatorsText: string | null;
-}
+import type { NoteItem, AspectScore, DeepDive, FocusPlan } from "@/types";
+import { getScoreColor, parseSavedNotes, parseJsonMap } from "@/lib/utils";
 
 interface Session {
   id: string;
   createdAt: string;
   scores: AspectScore[];
   deepDives: DeepDive[];
-  focusPlan: {
-    focusAspects: string;
-    targetResult: string | null;
-    crossResourcesText: string | null;
-    firstStepsText: string | null;
-  } | null;
+  focusPlan: FocusPlan | null;
   user: { name: string; email: string };
-}
-
-function getScoreColor(score: number): string {
-  if (score >= 8) return "#22c55e";
-  if (score >= 5) return "#eab308";
-  return "#ef4444";
-}
-
-function parseSavedNotes(tenOfTenText: string | null | undefined): NoteItem[] {
-  if (!tenOfTenText) return [];
-  try {
-    const parsed = JSON.parse(tenOfTenText);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
 }
 
 function ScoreCircle({ score, color }: { score: number; color: string }) {
@@ -131,16 +94,6 @@ export default function ResultPage() {
 
   function getDeepDive(code: string) {
     return session!.deepDives?.find((dd) => dd.aspectCode === code);
-  }
-
-  function parseJsonMap(s: string | null): Record<string, string> {
-    if (!s) return {};
-    try {
-      const p = JSON.parse(s);
-      return typeof p === "object" && !Array.isArray(p) ? p : {};
-    } catch {
-      return {};
-    }
   }
 
   return (

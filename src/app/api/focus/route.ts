@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
+  const authSession = await auth();
+  if (!authSession?.user?.id) {
+    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+  }
+
   const { sessionId, focusAspects, targetResult, crossResourcesText, firstStepsText } =
     await req.json();
 
   if (!sessionId) {
     return NextResponse.json({ error: "sessionId обязателен" }, { status: 400 });
+  }
+
+  const dbSession = await prisma.assessmentSession.findFirst({
+    where: { id: sessionId, userId: authSession.user.id },
+  });
+  if (!dbSession) {
+    return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
   }
 
   const focusPlan = await prisma.focusPlan.upsert({

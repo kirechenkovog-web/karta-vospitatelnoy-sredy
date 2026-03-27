@@ -81,7 +81,19 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const authSession = await auth();
+  if (!authSession?.user?.id) {
+    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+  }
+
   const { sessionId, currentStage, status } = await req.json();
+
+  const dbSession = await prisma.assessmentSession.findFirst({
+    where: { id: sessionId, userId: authSession.user.id },
+  });
+  if (!dbSession) {
+    return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
+  }
 
   const session = await prisma.assessmentSession.update({
     where: { id: sessionId },

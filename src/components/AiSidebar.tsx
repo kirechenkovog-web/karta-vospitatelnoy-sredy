@@ -1,19 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { useHighlight } from "@/contexts/HighlightContext";
-import { useAiEvent } from "@/contexts/AiEventContext";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  isEvent?: boolean;
-  buttonLabel?: string;
-  scoreRequest?: boolean;
-}
-
-interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
+import { useState } from "react";
+import { useChatLogic } from "@/hooks/useChatLogic";
+import type { NoteItem } from "@/types";
 
 interface AiSidebarProps {
   sessionId: string;
@@ -30,55 +21,13 @@ const MIN_WIDTH = 44;
 const DEFAULT_WIDTH = 510;
 const MAX_WIDTH = 700;
 
-export default function AiSidebar({
-  sessionId,
-  stage,
-  aspectCode,
-  autoTrigger,
-  sessionContext,
-  onScoreSuggested,
-  onNotesUpdated,
-  onChatButton,
-}: AiSidebarProps) {
+export default function AiSidebar(props: AiSidebarProps) {
+  const { onChatButton } = props;
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [collapsed, setCollapsed] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { setHighlight } = useHighlight();
-  const { registerHandler } = useAiEvent();
 
-  const loadingRef = useRef(false);
-  const sessionRef = useRef(sessionId);
-  const stageRef = useRef(stage);
-  const aspectRef = useRef(aspectCode);
-  const sessionContextRef = useRef(sessionContext);
-  const messagesRef = useRef(messages);
-  const onScoreSuggestedRef = useRef(onScoreSuggested);
-  const onNotesUpdatedRef = useRef(onNotesUpdated);
-  const onChatButtonRef = useRef(onChatButton);
-
-  sessionRef.current = sessionId;
-  stageRef.current = stage;
-  aspectRef.current = aspectCode;
-  sessionContextRef.current = sessionContext;
-  messagesRef.current = messages;
-  onScoreSuggestedRef.current = onScoreSuggested;
-  onNotesUpdatedRef.current = onNotesUpdated;
-  onChatButtonRef.current = onChatButton;
-
-  function handleAiResponse(data: { reply?: string; error?: string; highlightId?: string; suggestedScore?: number; noteItems?: NoteItem[]; buttonLabel?: string; scoreRequest?: boolean }): { reply: string; buttonLabel?: string; scoreRequest?: boolean } {
-    const reply = data.error ? (data.reply || data.error) : (data.reply ?? "");
-    if (data.highlightId) setHighlight(data.highlightId);
-    if (data.suggestedScore !== null && data.suggestedScore !== undefined) {
-      onScoreSuggestedRef.current?.(data.suggestedScore);
-    }
-    if (data.noteItems && data.noteItems.length > 0) {
-      onNotesUpdatedRef.current?.(data.noteItems);
-    }
-    return { reply, buttonLabel: data.buttonLabel ?? undefined, scoreRequest: data.scoreRequest };
-  }
+  const { messages, input, setInput, loading, handleSend, handleScoreSelect } = useChatLogic(props);
 
   // Drag-to-resize
   const isDragging = useRef(false);
@@ -97,8 +46,7 @@ export default function AiSidebar({
     function onMouseMove(e: MouseEvent) {
       if (!isDragging.current) return;
       const delta = e.clientX - dragStartX.current;
-      const newWidth = Math.min(MAX_WIDTH, Math.max(220, dragStartWidth.current + delta));
-      setWidth(newWidth);
+      setWidth(Math.min(MAX_WIDTH, Math.max(220, dragStartWidth.current + delta)));
     }
     function onMouseUp() {
       if (!isDragging.current) return;
@@ -114,130 +62,9 @@ export default function AiSidebar({
     };
   }, []);
 
-  async function callChat(text: string, history: Message[], isAuto: boolean) {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId: sessionRef.current,
-        stage: stageRef.current,
-        aspectCode: aspectRef.current,
-        message: text,
-        history: history
-          .filter((m) => !m.isEvent)
-          .slice(-10)
-          .map((m) => ({ role: m.role, content: m.content })),
-        isAuto,
-        sessionContext: sessionContextRef.current,
-      }),
-    });
-    return res.json();
-  }
-
-  // Register event handler — called from page components via useAiEvent()
-  useEffect(() => {
-    const unregister = registerHandler(async (eventText: string) => {
-      if (loadingRef.current) return;
-
-      const eventMsg: Message = { role: "user", content: eventText, isEvent: true };
-      const updatedHistory = [...messagesRef.current, eventMsg];
-      setMessages(updatedHistory);
-
-      loadingRef.current = true;
-      setLoading(true);
-      try {
-        const data = await callChat(eventText, updatedHistory, false);
-        const { reply, buttonLabel, scoreRequest } = handleAiResponse(data);
-        setMessages((prev) => [...prev, { role: "assistant", content: reply, buttonLabel, scoreRequest }]);
-      } catch {
-        // silent fail for events
-      } finally {
-        loadingRef.current = false;
-        setLoading(false);
-      }
-    });
-    return unregister;
-  }, [registerHandler, setHighlight]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Auto-trigger on context change — history persists, messages are appended
-  useEffect(() => {
-    if (!autoTrigger) return;
-    setLoading(false);
-    loadingRef.current = false;
-
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      if (cancelled) return;
-      loadingRef.current = true;
-      setLoading(true);
-      try {
-        const data = await callChat(autoTrigger, messagesRef.current, true);
-        if (cancelled) return;
-        const { reply, buttonLabel, scoreRequest } = handleAiResponse(data);
-        setMessages((prev) => [...prev, { role: "assistant", content: reply, buttonLabel, scoreRequest }]);
-        // Fallback highlights if AI didn't send one
-        if (!data.highlightId) {
-          const fallback =
-            (stageRef.current === 1 && aspectRef.current ? "score-selector" : null) ||
-            (stageRef.current === 1 && !aspectRef.current ? "aspect-card-social_partners" : null) ||
-            (stageRef.current === 3 ? "focus-selector" : null);
-          if (fallback) setHighlight(fallback);
-        }
-      } catch {
-        if (!cancelled) setMessages((prev) => [...prev, { role: "assistant", content: "Не удалось загрузить контекст." }]);
-      } finally {
-        if (!cancelled) { loadingRef.current = false; setLoading(false); }
-      }
-    }, 600);
-
-    return () => { cancelled = true; clearTimeout(timer); loadingRef.current = false; setLoading(false); };
-  }, [autoTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  async function handleScoreSelect(score: number) {
-    if (loading) return;
-    const text = String(score);
-    const newMessages: Message[] = [...messages, { role: "user", content: text }];
-    setMessages(newMessages);
-    onScoreSuggestedRef.current?.(score);
-    loadingRef.current = true;
-    setLoading(true);
-    try {
-      const data = await callChat(text, newMessages, false);
-      const { reply, buttonLabel, scoreRequest } = handleAiResponse(data);
-      setMessages((prev) => [...prev, { role: "assistant", content: reply, buttonLabel, scoreRequest }]);
-    } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Ошибка соединения." }]);
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-    }
-  }
-
-  async function handleSend() {
-    const text = input.trim();
-    if (!text || loading) return;
-    setInput("");
-
-    const newMessages: Message[] = [...messages, { role: "user", content: text }];
-    setMessages(newMessages);
-    loadingRef.current = true;
-    setLoading(true);
-
-    try {
-      const data = await callChat(text, newMessages, false);
-      const { reply, buttonLabel, scoreRequest } = handleAiResponse(data);
-      setMessages((prev) => [...prev, { role: "assistant", content: reply, buttonLabel, scoreRequest }]);
-    } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Ошибка соединения." }]);
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-    }
-  }
 
   const actualWidth = collapsed ? MIN_WIDTH : width;
 
@@ -330,9 +157,10 @@ export default function AiSidebar({
                     ) : msg.role === "user" ? (
                       msg.content
                     ) : null}
+
                     {msg.role === "assistant" && msg.scoreRequest && !loading && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
-                        {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
+                        {Array.from({ length: 10 }, (_, j) => j + 1).map((n) => {
                           const c = n >= 8 ? "#22c55e" : n >= 5 ? "#eab308" : "#ef4444";
                           return (
                             <button
@@ -347,9 +175,10 @@ export default function AiSidebar({
                         })}
                       </div>
                     )}
+
                     {msg.role === "assistant" && msg.buttonLabel && (
                       <button
-                        onClick={() => onChatButtonRef.current?.()}
+                        onClick={() => onChatButton?.()}
                         className="mt-2 w-full py-2 px-3 rounded-lg text-sm font-medium transition-opacity hover:opacity-80 text-white"
                         style={{ background: "#22c55e", border: "none", cursor: "pointer", display: "block" }}
                       >
