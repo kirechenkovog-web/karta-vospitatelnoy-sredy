@@ -30,7 +30,7 @@ const SYSTEM_PROMPT = `Ты — проактивный наставник сов
 Фаза 2 — Уточняющие вопросы:
   • Задай 1–2 вопроса о текущем состоянии — конкретных и практических
   • Фиксируй факты в [NOTE:bullet:...]
-  • Когда получил достаточно информации — задай вопрос об УДОВЛЕТВОРЁННОСТИ: «А если в целом — насколько вы довольны тем, как у вас [ключевые 3–5 слов из сути аспекта]? Поставьте оценку от 1 до 10.» Например: «...как у вас выстроена работа с партнёрами?», «...вовлечены педагоги в воспитательную работу?», «...организована работа актива?». Акцент — на личной удовлетворённости советника, а не просто на фактах из разговора. НЕ предлагай цифру сам.
+  • Когда получил достаточно информации — задай вопрос об УДОВЛЕТВОРЁННОСТИ: «А если в целом — насколько вы довольны тем, как у вас [ключевые 3–5 слов из сути аспекта]?» Например: «...как у вас выстроена работа с партнёрами?», «...вовлечены педагоги в воспитательную работу?», «...организована работа актива?». Акцент — на личной удовлетворённости советника, а не просто на фактах из разговора. НЕ предлагай цифру сам. Добавь в конец ответа [SCORE_REQUEST] — пользователю покажутся кнопки с оценками от 1 до 10.
 
 Фаза 3 — Идеальное состояние:
   • После оценки: «А как выглядело бы идеальное состояние этого аспекта для вас?»
@@ -156,6 +156,14 @@ function parseSuggestedScore(text: string): { text: string; suggestedScore: numb
   return { text, suggestedScore: null };
 }
 
+// Parse [SCORE_REQUEST]
+function parseScoreRequest(text: string): { text: string; scoreRequest: boolean } {
+  if (text.includes("[SCORE_REQUEST]")) {
+    return { text: text.replace(/\[SCORE_REQUEST\]/g, "").trim(), scoreRequest: true };
+  }
+  return { text, scoreRequest: false };
+}
+
 // Parse [NOTE:type:content]
 interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
 
@@ -205,7 +213,8 @@ export async function POST(req: NextRequest) {
     const { text: afterAction, highlightId } = parseAction(rawReply);
     const { text: afterButton, buttonLabel } = parseButton(afterAction);
     const { text: afterScore, suggestedScore } = parseSuggestedScore(afterButton);
-    const { text: reply, noteItems } = parseNoteItems(afterScore);
+    const { text: afterScoreReq, scoreRequest } = parseScoreRequest(afterScore);
+    const { text: reply, noteItems } = parseNoteItems(afterScoreReq);
 
     if (sessionId) {
       await prisma.aIMessage.createMany({
@@ -216,7 +225,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ reply, highlightId, buttonLabel, suggestedScore, noteItems });
+    return NextResponse.json({ reply, highlightId, buttonLabel, suggestedScore, scoreRequest, noteItems });
   } catch (error) {
     console.error("OpenAI error:", error);
     return NextResponse.json(
