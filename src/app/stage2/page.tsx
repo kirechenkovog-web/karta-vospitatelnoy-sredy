@@ -25,6 +25,83 @@ const FIELDS = [
   { key: "indicatorsText" as FieldKey, id: "indicators-field", label: "Индикаторы достижения цели", desc: "Как поймёте, что стало лучше?", color: "#f59e0b" },
 ];
 
+// ─── Placeholders per aspect × field ─────────────────────────────────────────
+
+const FIELD_EXAMPLES: Record<string, Record<string, string>> = {
+  social_partners: {
+    resultsText: "например: 5 партнёров, с которыми регулярно проводим совместные мероприятия",
+    resourcesText: "например: муниципальный координатор с широкой сетью контактов",
+    challengesText: "например: большинство партнёров не понимают, чем могут помочь школе",
+    indicatorsText: "например: не менее 3 совместных мероприятий в следующем семестре",
+  },
+  school_active: {
+    resultsText: "например: действующий совет активистов из 15 учеников 7–11 классов",
+    resourcesText: "например: отдельный кабинет и бюджет на нужды совета",
+    challengesText: "например: большинство активистов — одни и те же, новые не приходят",
+    indicatorsText: "например: активисты самостоятельно организовали хотя бы 2 мероприятия",
+  },
+  teachers: {
+    resultsText: "например: 12 педагогов ведут внеурочную деятельность",
+    resourcesText: "например: завуч поддерживает инициативы, есть методист по воспитанию",
+    challengesText: "например: педагоги воспринимают воспитательную работу как дополнительную нагрузку",
+    indicatorsText: "например: каждый классный руководитель провёл хотя бы 1 открытое мероприятие",
+  },
+  students_involvement: {
+    resultsText: "например: 70% учеников участвуют хотя бы в одном кружке или мероприятии",
+    resourcesText: "например: разнообразие кружков — спорт, творчество, волонтёрство",
+    challengesText: "например: старшеклассники практически не вовлечены — считают занятия «детскими»",
+    indicatorsText: "например: доля вовлечённых 10–11 классников выросла с 30% до 50%",
+  },
+  competitions: {
+    resultsText: "например: 8 призовых мест в муниципальных и региональных конкурсах за год",
+    resourcesText: "например: педагоги, готовые быть наставниками конкурсантов",
+    challengesText: "например: дети не знают о конкурсах — информация теряется",
+    indicatorsText: "например: каждый класс подал хотя бы одну заявку на конкурс",
+  },
+  federal_events: {
+    resultsText: "например: все федеральные мероприятия календаря отражены в плане школы",
+    resourcesText: "например: завуч координирует план, есть шаблоны отчётности",
+    challengesText: "например: сжатые сроки — узнаём о мероприятии за 3 дня",
+    indicatorsText: "например: план на следующий семестр готов до его начала",
+  },
+  parents: {
+    resultsText: "например: родительский комитет активно участвует в организации мероприятий",
+    resourcesText: "например: группа в мессенджере, куратор из числа родителей",
+    challengesText: "например: приходит одна и та же группа из 5–7 родителей, остальные пассивны",
+    indicatorsText: "например: на следующем родительском собрании явка выше 60%",
+  },
+  spaces: {
+    resultsText: "например: оформлен стенд достижений, работает зона отдыха в холле",
+    resourcesText: "например: небольшой бюджет на оформление, инициативные педагоги",
+    challengesText: "например: пространства устарели, ученики не чувствуют их «своими»",
+    indicatorsText: "например: ученики сами предложили и реализовали оформление одного пространства",
+  },
+  initiatives_center: {
+    resultsText: "например: центр запущен, проведено 3 проектных сессии с учениками",
+    resourcesText: "например: куратор центра, методические материалы по социальному проектированию",
+    challengesText: "например: дети не понимают, чем центр отличается от обычного кружка",
+    indicatorsText: "например: не менее 5 ученических инициатив доведено до реализации",
+  },
+  collectives: {
+    resultsText: "например: работает 6 творческих коллективов, суммарно 80 участников",
+    resourcesText: "например: педагоги-руководители коллективов, площадки для репетиций",
+    challengesText: "например: коллективы существуют сами по себе, не связаны с общей жизнью школы",
+    indicatorsText: "например: каждый коллектив выступил на общешкольном мероприятии",
+  },
+  grants: {
+    resultsText: "например: получен 1 грант на 150 000 ₽ на развитие волонтёрства",
+    resourcesText: "например: педагог с опытом написания заявок, связи с фондами",
+    challengesText: "например: не хватает времени на подготовку заявок",
+    indicatorsText: "например: подана хотя бы 1 заявка на грант в следующем полугодии",
+  },
+  professional_dev: {
+    resultsText: "например: 5 педагогов прошли курсы по воспитательной работе в этом году",
+    resourcesText: "например: бюджет на обучение, доступ к платформе Сферум",
+    challengesText: "например: педагоги не видят связи между курсами и своей реальной работой",
+    indicatorsText: "например: каждый педагог-воспитатель применил 1 новый метод на практике",
+  },
+};
+
 // ─── Field block ─────────────────────────────────────────────────────────────
 
 function FieldBlock({
@@ -32,13 +109,13 @@ function FieldBlock({
   value,
   onChange,
   onBlur,
-  aspectTitle,
+  aspectCode,
 }: {
   field: typeof FIELDS[0];
   value: string;
   onChange: (v: string) => void;
   onBlur?: (v: string) => void;
-  aspectTitle: string;
+  aspectCode: string;
 }) {
   const { isHighlighted, onInteract } = useHighlightedElement(field.id);
   const [newItem, setNewItem] = useState("");
@@ -100,7 +177,7 @@ function FieldBlock({
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addItem(); } }}
-          placeholder={`Добавить ${field.label.toLowerCase()}...`}
+          placeholder={items.length === 0 ? (FIELD_EXAMPLES[aspectCode]?.[field.key] ?? `Добавить ${field.label.toLowerCase()}...`) : `Добавить ещё...`}
           className="flex-1 px-3 py-2 rounded-xl text-sm"
           style={{ background: "var(--surface-2)", border: `1px solid ${field.color}40`, color: "var(--foreground)", outline: "none" }}
           onFocus={(e) => { e.target.style.borderColor = field.color; }}
@@ -372,7 +449,7 @@ function Stage2Content({ session }: { session: Session }) {
                   value={getDraft(selectedAspect.code, field.key)}
                   onChange={(v) => setDraft(selectedAspect.code, field.key, v)}
                   onBlur={(v) => sendEvent(`[СОБЫТИЕ: Пользователь заполнил поле «${field.label}» по аспекту «${selectedAspect.title}»: «${v.trim().slice(0, 120)}»]`)}
-                  aspectTitle={selectedAspect.title}
+                  aspectCode={selectedAspect.code}
                 />
               ))}
             </div>
