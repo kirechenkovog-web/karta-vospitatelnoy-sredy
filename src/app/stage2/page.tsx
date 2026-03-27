@@ -8,6 +8,7 @@ import AppShell from "@/components/AppShell";
 import StageNav from "@/components/StageNav";
 import { useHighlightedElement } from "@/contexts/HighlightContext";
 import { useAiEvent } from "@/contexts/AiEventContext";
+import { FieldIcon, DEEP_FIELDS as FIELD_DEFS, type FieldKey } from "@/components/FieldIcons";
 
 interface DeepDive {
   aspectCode: string;
@@ -33,10 +34,10 @@ interface Session {
 interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
 
 const FIELDS = [
-  { key: "resultsText", id: "results-field", label: "Результаты", desc: "Что уже достигнуто", color: "#22c55e" },
-  { key: "resourcesText", id: "resources-field", label: "Ресурсы", desc: "Что есть в наличии: люди, связи, время", color: "#4F46E5" },
-  { key: "challengesText", id: "challenges-field", label: "Вызовы", desc: "Что создаёт трудности, что мешает", color: "#ef4444" },
-  { key: "indicatorsText", id: "indicators-field", label: "Индикаторы достижения цели", desc: "Как поймёте, что стало лучше?", color: "#f59e0b" },
+  { key: "resultsText" as FieldKey, id: "results-field", label: "Результаты", desc: "Что уже достигнуто", color: "#22c55e" },
+  { key: "resourcesText" as FieldKey, id: "resources-field", label: "Ресурсы", desc: "Что есть в наличии: люди, связи, время", color: "#4F46E5" },
+  { key: "challengesText" as FieldKey, id: "challenges-field", label: "Вызовы", desc: "Что создаёт трудности, что мешает", color: "#ef4444" },
+  { key: "indicatorsText" as FieldKey, id: "indicators-field", label: "Индикаторы достижения цели", desc: "Как поймёте, что стало лучше?", color: "#f59e0b" },
 ];
 
 function getScoreColor(score: number): string {
@@ -79,7 +80,7 @@ function FieldBlock({
       onClick={onInteract}
     >
       <div className="flex items-center gap-2 mb-1">
-        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: field.color }} />
+        <FieldIcon fieldKey={field.key} color={field.color} size={14} />
         <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>{field.label}</span>
       </div>
       <div className="text-xs mb-1.5" style={{ color: "var(--muted)" }}>{field.desc}</div>
@@ -208,9 +209,6 @@ function Stage2Content({ session }: { session: Session }) {
     }
     prevSelectedRef.current = code;
     setSelectedCode(code);
-
-    const asp = ASPECTS.find((a) => a.code === code);
-    if (asp) sendEvent(`[СОБЫТИЕ: Пользователь открыл аспект «${asp.title}» для углублённого анализа]`);
   }
 
   const selectedAspect = selectedCode ? ASPECTS.find((a) => a.code === selectedCode) : null;
@@ -247,66 +245,49 @@ function Stage2Content({ session }: { session: Session }) {
           <p className="text-xs" style={{ color: "var(--muted)" }}>Нажмите на аспект, чтобы заполнить данные.</p>
         </div>
 
-        {/* Compact aspect list */}
-        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border)", background: "var(--surface)" }}>
-          {ASPECTS.map((asp, idx) => {
-            const sc = getScore(asp.code);
-            const dived = isDeepDived(asp.code);
-            const isSelected = selectedCode === asp.code;
-            const scoreNum = sc?.score ?? null;
-            const scoreColor = scoreNum !== null ? getScoreColor(scoreNum) : "var(--muted)";
-            const filledCount = FIELDS.filter((f) => getDraft(asp.code, f.key).trim()).length;
+        {/* Aspect grid — same style as stage 3 */}
+        <div className="p-4 rounded-2xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Выберите аспект для анализа</div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {ASPECTS.map((asp) => {
+              const sc = getScore(asp.code);
+              const dived = isDeepDived(asp.code);
+              const isSelected = selectedCode === asp.code;
+              const scoreNum = sc?.score ?? null;
+              const scoreColor = scoreNum !== null ? getScoreColor(scoreNum) : "var(--muted)";
 
-            return (
-              <button
-                key={asp.code}
-                onClick={() => handleSelectAspect(asp.code)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
-                style={{
-                  background: isSelected ? "#4F46E508" : "transparent",
-                  borderBottom: idx < ASPECTS.length - 1 ? "1px solid var(--border)" : "none",
-                  border: "none",
-                  cursor: "pointer",
-                  borderLeft: isSelected ? "3px solid #4F46E5" : "3px solid transparent",
-                }}
-              >
-                {/* Score badge */}
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  style={{ background: scoreColor + "20", color: scoreColor }}
+              return (
+                <button
+                  key={asp.code}
+                  onClick={() => handleSelectAspect(asp.code)}
+                  className="p-2.5 rounded-xl text-left transition-all"
+                  style={{
+                    background: isSelected ? "#4F46E510" : dived ? "var(--surface-2)" : "transparent",
+                    border: isSelected ? "2px solid #4F46E5" : `1px solid ${dived ? "#4F46E530" : "var(--border)"}`,
+                    cursor: "pointer",
+                  }}
                 >
-                  {scoreNum ?? "—"}
-                </div>
-
-                {/* Title */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate" style={{ color: isSelected ? "#4F46E5" : "var(--foreground)" }}>
-                    {asp.title}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold truncate" style={{ color: isSelected ? "#4F46E5" : "var(--foreground)" }}>
+                      {asp.shortTitle}
+                    </span>
+                    <span className="text-xs font-bold ml-1 flex-shrink-0" style={{ color: scoreColor }}>
+                      {scoreNum ?? "—"}
+                    </span>
                   </div>
-                </div>
-
-                {/* Status */}
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  {filledCount > 0 && (
-                    <div className="flex gap-0.5">
-                      {FIELDS.map((f, fi) => (
-                        <div
-                          key={fi}
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ background: getDraft(asp.code, f.key).trim() ? f.color : "var(--border)" }}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {dived && (
-                    <div className="text-xs w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "#22c55e20", color: "#22c55e" }}>
-                      ✓
-                    </div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
+                  <div className="mt-0.5" style={{ fontSize: 10, color: "var(--muted)" }}>
+                    {isSelected
+                      ? <span style={{ color: "#4F46E5" }}>✓ открыт</span>
+                      : dived
+                      ? <span style={{ color: "#22c55e" }}>✓ заполнен</span>
+                      : null}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Edit window */}

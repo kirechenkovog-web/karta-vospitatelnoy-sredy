@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ASPECTS } from "@/data/aspects";
+import { FieldIcon, type FieldKey } from "@/components/FieldIcons";
 
 interface NoteItem { type: "heading" | "bullet" | "quote"; text: string; }
 
@@ -132,9 +133,15 @@ export default function ResultPage() {
     return session!.deepDives?.find((dd) => dd.aspectCode === code);
   }
 
-  const avgScore = scores.length
-    ? Math.round(scores.reduce((sum, s) => sum + (s.score ?? 0), 0) / scores.length * 10) / 10
-    : 0;
+  function parseJsonMap(s: string | null): Record<string, string> {
+    if (!s) return {};
+    try {
+      const p = JSON.parse(s);
+      return typeof p === "object" && !Array.isArray(p) ? p : {};
+    } catch {
+      return {};
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--background)" }}>
@@ -159,21 +166,16 @@ export default function ResultPage() {
 
         {/* Compact hero */}
         <div
-          className="px-6 py-5 rounded-2xl mb-6 flex items-center justify-between"
+          className="px-6 py-5 rounded-2xl mb-6"
           style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", border: "1px solid #4F46E540" }}
         >
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-5 h-5 rounded-md flex items-center justify-center text-xs" style={{ background: "#4F46E5", color: "#fff" }}>✦</div>
-              <span className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Карта заполнена</span>
-            </div>
-            <div className="text-xs" style={{ color: "#94a3b8" }}>
-              {session.user.name} · {new Date(session.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
-            </div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 rounded-md flex items-center justify-center text-xs" style={{ background: "#4F46E5", color: "#fff" }}>✦</div>
+            <span className="text-base font-bold" style={{ color: "#e2e8f0" }}>Карта воспитательной среды</span>
           </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold" style={{ color: getScoreColor(Math.round(avgScore)) }}>{avgScore}</div>
-            <div className="text-xs" style={{ color: "#94a3b8" }}>средний балл</div>
+          <div className="text-sm font-medium" style={{ color: "#94a3b8" }}>{session.user.name}</div>
+          <div className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+            {new Date(session.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
           </div>
         </div>
 
@@ -206,7 +208,7 @@ export default function ResultPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-medium leading-tight truncate" style={{ color: "var(--foreground)" }}>
-                      {asp.title}
+                      {asp.shortTitle}
                     </div>
                     {isFocus && (
                       <div className="text-xs mt-0.5" style={{ color: scoreColor }}>фокус</div>
@@ -225,41 +227,54 @@ export default function ResultPage() {
           </div>
         </div>
 
-        {/* Focus plan */}
-        {session.focusPlan && focusAspects.length > 0 && (
-          <div
-            className="p-5 rounded-2xl mb-6"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-          >
-            <h2 className="text-base font-semibold mb-4" style={{ color: "var(--foreground)" }}>Фокус развития на 2 месяца</h2>
-            <div className="flex gap-2 flex-wrap mb-4">
-              {focusAspects.map((code) => {
-                const asp = ASPECTS.find((a) => a.code === code);
-                if (!asp) return null;
-                const sc = getScore(code);
-                const scoreColor = sc?.score ? getScoreColor(sc.score) : asp.color;
-                return (
-                  <div key={code} className="px-3 py-1.5 rounded-lg text-sm font-medium"
-                    style={{ background: scoreColor + "20", color: scoreColor, border: `1px solid ${scoreColor}40` }}>
-                    {asp.title}
-                  </div>
-                );
-              })}
+        {/* Focus plan — per-aspect */}
+        {session.focusPlan && focusAspects.length > 0 && (() => {
+          const targetMap = parseJsonMap(session.focusPlan!.targetResult);
+          const stepsMap = parseJsonMap(session.focusPlan!.firstStepsText);
+          return (
+            <div className="mb-6">
+              <h2 className="text-base font-semibold mb-3" style={{ color: "var(--foreground)" }}>Фокус развития на 2 месяца</h2>
+              <div className="flex flex-col gap-3">
+                {focusAspects.map((code) => {
+                  const asp = ASPECTS.find((a) => a.code === code);
+                  if (!asp) return null;
+                  const sc = getScore(code);
+                  const scoreNum = sc?.score ?? null;
+                  const scoreColor = scoreNum !== null ? getScoreColor(scoreNum) : asp.color;
+                  const target = targetMap[code] || session.focusPlan!.targetResult;
+                  const steps = stepsMap[code] || session.focusPlan!.firstStepsText;
+                  return (
+                    <div key={code} className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: `1px solid ${scoreColor}40` }}>
+                      <div className="px-5 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid var(--border)", background: scoreColor + "08" }}>
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: scoreColor + "20", color: scoreColor }}>
+                          {scoreNum ?? "—"}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold" style={{ color: "var(--foreground)" }}>{asp.title}</div>
+                          <div className="text-xs" style={{ color: "var(--muted)" }}>Фокусный аспект</div>
+                        </div>
+                      </div>
+                      <div className="px-5 py-4 flex flex-col gap-3">
+                        {target && (
+                          <div>
+                            <div className="text-xs font-semibold mb-1" style={{ color: "var(--muted)" }}>Желаемый результат</div>
+                            <div className="text-sm leading-relaxed" style={{ color: "var(--foreground)" }}>{target}</div>
+                          </div>
+                        )}
+                        {steps && (
+                          <div className="p-3 rounded-xl" style={{ background: "#4F46E508", border: "1px solid #4F46E525" }}>
+                            <div className="text-xs font-semibold mb-1" style={{ color: "#4F46E5" }}>Первые шаги</div>
+                            <div className="text-sm leading-relaxed" style={{ color: "var(--foreground)" }}>{steps}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            {session.focusPlan.targetResult && (
-              <div className="mb-3">
-                <div className="text-xs font-medium mb-1" style={{ color: "var(--muted)" }}>Желаемый результат</div>
-                <div className="text-sm leading-relaxed" style={{ color: "var(--foreground)" }}>{session.focusPlan.targetResult}</div>
-              </div>
-            )}
-            {session.focusPlan.firstStepsText && (
-              <div className="p-3 rounded-xl" style={{ background: "#4F46E510", border: "1px solid #4F46E530" }}>
-                <div className="text-xs font-medium mb-1" style={{ color: "#4F46E5" }}>Первые шаги</div>
-                <div className="text-sm leading-relaxed" style={{ color: "var(--foreground)" }}>{session.focusPlan.firstStepsText}</div>
-              </div>
-            )}
-          </div>
-        )}
+          );
+        })()}
 
         {/* Per-aspect detail */}
         <h2 className="text-base font-semibold mb-3" style={{ color: "var(--foreground)" }}>Детали по аспектам</h2>
@@ -288,7 +303,7 @@ export default function ResultPage() {
                   {/* Illustration */}
                   <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0" style={{ background: asp.color + "10" }}>
                     <img
-                      src={`/illustrations/${asp.code}.png`}
+                      src={`/illustrations/square/${asp.code}.png`}
                       alt=""
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
@@ -317,7 +332,7 @@ export default function ResultPage() {
                     {/* AI notes from stage 1 */}
                     {notes.length > 0 && (
                       <div>
-                        <div className="text-xs font-semibold mb-1.5" style={{ color: "#4F46E5" }}>✦ Из разговора (этап 1)</div>
+                        <div className="text-xs font-semibold mb-1.5" style={{ color: "#4F46E5" }}>✦ Заметки</div>
                         <div className="space-y-1">
                           {notes.map((note, i) => {
                             if (note.type === "heading") {
@@ -350,7 +365,7 @@ export default function ResultPage() {
                           return (
                             <div key={f.key} className="rounded-xl p-3" style={{ background: f.color + "08", border: `1px solid ${f.color}25` }}>
                               <div className="flex items-center gap-1.5 mb-1">
-                                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: f.color }} />
+                                <FieldIcon fieldKey={f.key as FieldKey} color={f.color} size={13} />
                                 <span className="text-xs font-semibold" style={{ color: f.color }}>{f.label}</span>
                               </div>
                               <p className="text-xs leading-relaxed" style={{ color: "var(--foreground)" }}>{val}</p>

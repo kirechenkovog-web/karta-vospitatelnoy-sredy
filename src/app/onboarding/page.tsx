@@ -351,23 +351,23 @@ function PanelIntro() {
       {/* Stages */}
       <div className="flex gap-4">
         {[
-          { n: "1", t: "Оценка", sub: "12 аспектов работы", c: "#22c55e" },
-          { n: "2", t: "Анализ", sub: "Углублённый разбор", c: "#4F46E5" },
-          { n: "3", t: "Фокус", sub: "План на 2 месяца", c: "#f59e0b" },
+          { t: "Оценка", sub: "12 аспектов работы", c: "#22c55e" },
+          { t: "Анализ", sub: "Углублённый разбор", c: "#4F46E5" },
+          { t: "Фокус", sub: "План на 2 месяца", c: "#f59e0b" },
         ].map((s) => (
           <div
-            key={s.n}
+            key={s.t}
             className="flex-1 rounded-2xl px-5 py-4 flex flex-col gap-1"
             style={{ background: s.c + "18", border: `1px solid ${s.c}40` }}
           >
-            <div className="text-xs font-semibold" style={{ color: s.c }}>{s.n}. {s.t}</div>
+            <div className="text-xs font-semibold" style={{ color: s.c }}>{s.t}</div>
             <div className="text-sm text-white">{s.sub}</div>
           </div>
         ))}
       </div>
 
       {/* Time estimate */}
-      <div className="text-sm" style={{ color: "#475569" }}>~20–30 минут</div>
+      <div className="text-sm" style={{ color: "#94a3b8" }}>~20–30 минут</div>
     </div>
   );
 }
