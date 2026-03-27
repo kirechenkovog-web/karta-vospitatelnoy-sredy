@@ -109,7 +109,17 @@ function Stage3Content({ session }: { session: Session }) {
             {focusAspects.length}/2 выбрано
           </div>
         </div>
-        <p className="text-xs mb-3" style={{ color: "var(--muted)" }}>Рекомендуем выбирать из углублённых на этапе 2</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs" style={{ color: "var(--muted)" }}>Рекомендуем выбирать из углублённых на этапе 2</p>
+          <div className="flex items-center gap-3">
+            {FIELD_DEFS.map((f) => (
+              <div key={f.key} className="flex items-center gap-1">
+                <FieldIcon fieldKey={f.key as FieldKey} color={f.color} size={11} />
+                <span style={{ color: f.color, fontSize: 11, fontWeight: 500 }}>{f.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="grid grid-cols-3 gap-2">
           {ASPECTS.map((asp) => {
@@ -161,12 +171,9 @@ function Stage3Content({ session }: { session: Session }) {
                     {filledFields.map((f) => {
                       const val = (dd?.[f.key as keyof DeepDive] as string) ?? "";
                       return (
-                        <div key={f.key} className="rounded-lg px-2 py-1.5" style={{ background: f.color + "10", border: `1px solid ${f.color}25` }}>
-                          <div className="flex items-center gap-1 mb-0.5">
-                            <FieldIcon fieldKey={f.key as FieldKey} color={f.color} size={10} />
-                            <span style={{ color: f.color, fontSize: 10, fontWeight: 600 }}>{f.label}</span>
-                          </div>
-                          <div className="leading-tight" style={{ color: "var(--muted)", fontSize: 10, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" }}>
+                        <div key={f.key} className="flex items-start gap-1.5 rounded-lg px-2 py-1.5" style={{ background: f.color + "10", border: `1px solid ${f.color}25` }}>
+                          <FieldIcon fieldKey={f.key as FieldKey} color={f.color} size={10} />
+                          <div className="leading-tight min-w-0" style={{ color: "var(--muted)", fontSize: 10, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                             {val.trim().split("\n")[0].slice(0, 50)}
                           </div>
                         </div>
