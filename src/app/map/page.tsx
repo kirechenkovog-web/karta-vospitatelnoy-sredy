@@ -71,7 +71,7 @@ function AspectCard({ aspect, score, isCompleted, onClick }: {
       <div className="flex items-start justify-between px-3 pt-2" style={{ minHeight: 60 }}>
         <div
           className="font-semibold leading-snug pr-2 pt-1"
-          style={{ color: isCompleted ? aspect.color : "var(--foreground)", fontSize: 13, maxWidth: "62%" }}
+          style={{ color: isCompleted ? aspect.color : "var(--foreground)", fontSize: 15, maxWidth: "62%" }}
         >
           {aspect.shortTitle}
         </div>
