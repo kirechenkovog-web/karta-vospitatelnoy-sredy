@@ -41,33 +41,80 @@ function FieldBlock({
   aspectTitle: string;
 }) {
   const { isHighlighted, onInteract } = useHighlightedElement(field.id);
+  const [newItem, setNewItem] = useState("");
+
+  const items = value ? value.split("\n").filter((s) => s.trim()) : [];
+
+  function addItem() {
+    const trimmed = newItem.trim();
+    if (!trimmed) return;
+    const next = [...items, trimmed].join("\n");
+    onChange(next);
+    onBlur?.(next);
+    setNewItem("");
+    onInteract();
+  }
+
+  function removeItem(idx: number) {
+    const next = items.filter((_, i) => i !== idx).join("\n");
+    onChange(next);
+  }
 
   return (
     <div
       id={field.id}
       className={`transition-all ${isHighlighted ? "ai-highlighted rounded-xl" : ""}`}
-      onClick={onInteract}
     >
       <div className="flex items-center gap-2 mb-1">
         <FieldIcon fieldKey={field.key} color={field.color} size={14} />
         <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>{field.label}</span>
       </div>
-      <div className="text-xs mb-1.5" style={{ color: "var(--muted)" }}>{field.desc}</div>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={(e) => {
-          if (e.target.value.trim()) {
-            onBlur?.(e.target.value);
-          }
-        }}
-        placeholder="Введите текст..."
-        rows={3}
-        className="w-full text-sm resize-none leading-relaxed rounded-xl p-3"
-        style={{ background: "var(--surface-2)", border: `1px solid ${field.color}40`, color: "var(--foreground)", outline: "none" }}
-        onFocus={(e) => { e.target.style.borderColor = field.color; }}
-        onBlurCapture={(e) => { e.target.style.borderColor = `${field.color}40`; }}
-      />
+      <div className="text-xs mb-2" style={{ color: "var(--muted)" }}>{field.desc}</div>
+
+      {/* Existing items */}
+      {items.length > 0 && (
+        <div className="flex flex-col gap-1 mb-2">
+          {items.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl"
+              style={{ background: field.color + "10", border: `1px solid ${field.color}30` }}
+            >
+              <span className="text-sm leading-snug" style={{ color: "var(--foreground)" }}>{item}</span>
+              <button
+                onClick={() => removeItem(i)}
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs hover:opacity-70"
+                style={{ background: field.color + "25", color: field.color, border: "none", cursor: "pointer" }}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add new */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addItem(); } }}
+          placeholder={`Добавить ${field.label.toLowerCase()}...`}
+          className="flex-1 px-3 py-2 rounded-xl text-sm"
+          style={{ background: "var(--surface-2)", border: `1px solid ${field.color}40`, color: "var(--foreground)", outline: "none" }}
+          onFocus={(e) => { e.target.style.borderColor = field.color; }}
+          onBlur={(e) => { e.target.style.borderColor = `${field.color}40`; }}
+        />
+        <button
+          onClick={addItem}
+          disabled={!newItem.trim()}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-lg font-light disabled:opacity-40 flex-shrink-0"
+          style={{ background: field.color, border: "none", cursor: "pointer" }}
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 }
@@ -266,16 +313,17 @@ function Stage2Content({ session }: { session: Session }) {
                       )}
                     </div>
                   </div>
-                  {dived && filledFields.length > 0 && (
-                    <div className="grid grid-cols-2 gap-1 mb-2">
-                      {filledFields.map((f) => (
-                        <div key={f.key} className="flex items-start gap-1.5 rounded-lg px-2 py-1.5" style={{ background: f.color + "10", border: `1px solid ${f.color}25` }}>
-                          <FieldIcon fieldKey={f.key} color={f.color} size={10} />
-                          <div className="leading-tight min-w-0" style={{ color: "var(--muted)", fontSize: 10, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                            {draftData[asp.code][f.key].trim().split("\n")[0].slice(0, 50)}
+                  {dived && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {FIELDS.flatMap((f) => {
+                        const items = (draftData[asp.code]?.[f.key] ?? "").split("\n").filter((s) => s.trim());
+                        return items.slice(0, 3).map((item, i) => (
+                          <div key={`${f.key}-${i}`} className="flex items-center gap-1 px-2 py-1 rounded-lg" style={{ background: f.color + "12", border: `1px solid ${f.color}30` }}>
+                            <FieldIcon fieldKey={f.key} color={f.color} size={9} />
+                            <span style={{ color: "var(--foreground)", fontSize: 10 }}>{item.slice(0, 28)}</span>
                           </div>
-                        </div>
-                      ))}
+                        ));
+                      })}
                     </div>
                   )}
                   <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-xl" style={{ background: scoreColor + "30" }}>

@@ -166,18 +166,17 @@ function Stage3Content({ session }: { session: Session }) {
                     )}
                   </div>
                 </div>
-                {isDived && filledFields.length > 0 && (
-                  <div className="grid grid-cols-2 gap-1 mb-2">
-                    {filledFields.map((f) => {
+                {isDived && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {FIELD_DEFS.flatMap((f) => {
                       const val = (dd?.[f.key as keyof DeepDive] as string) ?? "";
-                      return (
-                        <div key={f.key} className="flex items-start gap-1.5 rounded-lg px-2 py-1.5" style={{ background: f.color + "10", border: `1px solid ${f.color}25` }}>
-                          <FieldIcon fieldKey={f.key as FieldKey} color={f.color} size={10} />
-                          <div className="leading-tight min-w-0" style={{ color: "var(--muted)", fontSize: 10, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                            {val.trim().split("\n")[0].slice(0, 50)}
-                          </div>
+                      const items = val.split("\n").filter((s) => s.trim());
+                      return items.slice(0, 3).map((item, i) => (
+                        <div key={`${f.key}-${i}`} className="flex items-center gap-1 px-2 py-1 rounded-lg" style={{ background: f.color + "12", border: `1px solid ${f.color}30` }}>
+                          <FieldIcon fieldKey={f.key as FieldKey} color={f.color} size={9} />
+                          <span style={{ color: "var(--foreground)", fontSize: 10 }}>{item.slice(0, 28)}</span>
                         </div>
-                      );
+                      ));
                     })}
                   </div>
                 )}
