@@ -305,29 +305,41 @@ function PanelReady() {
 
 function PanelIntro() {
   return (
-    <div className="flex items-center justify-center h-full p-10">
-      <div
-        className="w-full max-w-sm rounded-3xl p-8 text-center flex flex-col items-center gap-5"
-        style={{
-          background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-          border: "1px solid #4F46E540",
-        }}
-      >
-        <div className="text-5xl" style={{ color: "#4F46E5", animation: "pulse 2s infinite" }}>✦</div>
-        <div>
-          <div className="text-xl font-bold text-white mb-1">Карта воспитательной среды</div>
-          <div className="text-sm" style={{ color: "#94a3b8" }}>Инструмент самодиагностики для советника директора</div>
+    <div
+      className="h-full flex flex-col items-center justify-center px-16 gap-10"
+      style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%)" }}
+    >
+      {/* Icon */}
+      <div style={{ fontSize: 64, color: "#4F46E5", animation: "pulse 2s infinite" }}>✦</div>
+
+      {/* Title block */}
+      <div className="text-center">
+        <div className="text-4xl font-bold text-white mb-3">Карта воспитательной среды</div>
+        <div className="text-lg" style={{ color: "#94a3b8" }}>
+          Инструмент самодиагностики для советника директора школы
         </div>
-        <div className="flex gap-2 flex-wrap justify-center">
-          {[{ n: "1", t: "Оценка", c: "#22c55e" }, { n: "2", t: "Анализ", c: "#4F46E5" }, { n: "3", t: "Фокус", c: "#f59e0b" }].map((s) => (
-            <div key={s.n} className="px-3 py-1.5 rounded-full text-xs font-medium text-white"
-              style={{ background: s.c + "30", border: `1px solid ${s.c}60` }}>
-              {s.n}. {s.t}
-            </div>
-          ))}
-        </div>
-        <div className="text-xs" style={{ color: "#64748b" }}>~20–30 минут</div>
       </div>
+
+      {/* Stages */}
+      <div className="flex gap-4">
+        {[
+          { n: "1", t: "Оценка", sub: "12 аспектов работы", c: "#22c55e" },
+          { n: "2", t: "Анализ", sub: "Углублённый разбор", c: "#4F46E5" },
+          { n: "3", t: "Фокус", sub: "План на 2 месяца", c: "#f59e0b" },
+        ].map((s) => (
+          <div
+            key={s.n}
+            className="flex-1 rounded-2xl px-5 py-4 flex flex-col gap-1"
+            style={{ background: s.c + "18", border: `1px solid ${s.c}40` }}
+          >
+            <div className="text-xs font-semibold" style={{ color: s.c }}>{s.n}. {s.t}</div>
+            <div className="text-sm text-white">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Time estimate */}
+      <div className="text-sm" style={{ color: "#475569" }}>~20–30 минут</div>
     </div>
   );
 }
