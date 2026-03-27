@@ -138,7 +138,7 @@ function PanelAspects() {
             </div>
             <div style={{ flex: 1, padding: "4px 6px 6px", overflow: "hidden" }}>
               <img
-                src={`/illustrations/${asp.code}.png`}
+                src={`/illustrations/square/${asp.code}.png`}
                 alt=""
                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 4 }}
               />
@@ -150,7 +150,7 @@ function PanelAspects() {
   );
 }
 
-// ─── Right panel: Stage 2 (compact list + edit window) ────────────────────────
+// ─── Right panel: Stage 2 (grid + edit window) ────────────────────────────────
 
 function PanelStage2() {
   const selectedCode = "students_involvement";
@@ -163,41 +163,38 @@ function PanelStage2() {
         Этап 2 — Углублённый анализ
       </div>
 
-      {/* Compact list */}
-      <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--border)", background: "var(--surface)" }}>
-        {ASPECTS.slice(0, 6).map((asp, idx) => {
-          const score = MOCK_SCORES[asp.code];
-          const scoreColor = getScoreColor(score);
-          const isSelected = asp.code === selectedCode;
-          const isDived = MOCK_DIVES.includes(asp.code);
-          const filledCount = (MOCK_FIELD_DATA[asp.code] ?? []).length;
-          return (
-            <div key={asp.code} className="flex items-center gap-2 px-3 py-2"
-              style={{
-                borderBottom: idx < 5 ? "1px solid var(--border)" : "none",
-                background: isSelected ? "#4F46E508" : "transparent",
-                borderLeft: isSelected ? "3px solid #4F46E5" : "3px solid transparent",
-              }}>
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
-                style={{ background: scoreColor + "20", color: scoreColor }}>{score}</div>
-              <div className="flex-1 text-xs font-medium truncate" style={{ color: isSelected ? "#4F46E5" : "var(--foreground)" }}>
-                {asp.shortTitle}
+      {/* Aspect grid */}
+      <div className="p-3 rounded-2xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+        <div className="text-xs font-medium mb-2" style={{ color: "var(--foreground)" }}>Выберите аспект для анализа</div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {ASPECTS.map((asp) => {
+            const score = MOCK_SCORES[asp.code];
+            const scoreColor = getScoreColor(score);
+            const isSelected = asp.code === selectedCode;
+            const isDived = MOCK_DIVES.includes(asp.code);
+            return (
+              <div key={asp.code} className="p-2 rounded-xl"
+                style={{
+                  background: isSelected ? "#4F46E510" : isDived ? "var(--surface-2)" : "transparent",
+                  border: isSelected ? "2px solid #4F46E5" : `1px solid ${isDived ? "#4F46E530" : "var(--border)"}`,
+                }}>
+                <div className="flex items-center justify-between">
+                  <span className="truncate font-semibold" style={{ color: isSelected ? "#4F46E5" : "var(--foreground)", fontSize: 10 }}>{asp.shortTitle}</span>
+                  <span className="font-bold ml-1 flex-shrink-0" style={{ color: scoreColor, fontSize: 10 }}>{score}</span>
+                </div>
+                <div style={{ fontSize: 9, color: isSelected ? "#4F46E5" : isDived ? "#22c55e" : "transparent" }}>
+                  {isSelected ? "✓ открыт" : isDived ? "✓ заполнен" : "·"}
+                </div>
               </div>
-              <div className="flex gap-0.5 flex-shrink-0">
-                {filledCount > 0 && [0,1,2,3].map((fi) => (
-                  <div key={fi} className="w-1 h-1 rounded-full" style={{ background: fi < filledCount ? FIELDS[fi].color : "var(--border)" }} />
-                ))}
-                {isDived && <div className="ml-1 text-xs" style={{ color: "#22c55e" }}>✓</div>}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Edit window */}
       <div className="rounded-2xl overflow-hidden flex-shrink-0" style={{ border: "1px solid var(--border)", background: "var(--surface)" }}>
         <div className="px-3 py-2.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)", background: selectedAsp.color + "08" }}>
-          <div className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>{selectedAsp.shortTitle}</div>
+          <div className="text-xs font-bold" style={{ color: "var(--foreground)" }}>{selectedAsp.title}</div>
           <div className="text-xs px-2 py-0.5 rounded-full" style={{ background: selectedAsp.color + "20", color: selectedAsp.color }}>
             {MOCK_SCORES[selectedCode]}/10
           </div>
@@ -209,7 +206,7 @@ function PanelStage2() {
                 <div className="w-1.5 h-1.5 rounded-full" style={{ background: f.color }} />
                 <span className="text-xs font-semibold" style={{ color: f.color }}>{f.label}</span>
               </div>
-              <div className="text-xs leading-relaxed" style={{ color: "var(--muted)", fontSize: 10 }}>
+              <div className="text-xs" style={{ color: "var(--muted)", fontSize: 10 }}>
                 {(MOCK_FIELD_DATA[selectedCode] ?? []).includes(f.key) ? "Заполнено..." : "—"}
               </div>
             </div>
@@ -262,27 +259,29 @@ function PanelStage3() {
         </div>
       </div>
 
-      {/* Strategy cards */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <div className="px-3 py-2.5 flex items-center gap-2" style={{ borderBottom: "1px solid var(--border)" }}>
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#4F46E515" }}>
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#4F46E5" strokeWidth="1.5"/><circle cx="8" cy="8" r="3.5" stroke="#4F46E5" strokeWidth="1.5"/><circle cx="8" cy="8" r="1" fill="#4F46E5"/></svg>
+      {/* Per-aspect strategy cards */}
+      {focusAspects.map((code) => {
+        const asp = ASPECTS.find((a) => a.code === code)!;
+        const score = MOCK_SCORES[code];
+        const scoreColor = getScoreColor(score);
+        return (
+          <div key={code} className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: `1px solid ${scoreColor}40` }}>
+            <div className="px-3 py-2 flex items-center gap-2" style={{ borderBottom: "1px solid var(--border)", background: scoreColor + "08" }}>
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+                style={{ background: scoreColor + "20", color: scoreColor }}>{score}</div>
+              <div className="text-xs font-bold" style={{ color: "var(--foreground)" }}>{asp.shortTitle}</div>
+            </div>
+            <div className="px-3 pt-2 pb-1" style={{ borderBottom: "1px solid var(--border)" }}>
+              <div className="text-xs font-semibold mb-0.5" style={{ color: "var(--foreground)" }}>Желаемый результат</div>
+              <div style={{ fontSize: 10, color: "var(--muted)" }}>Конкретно и измеримо — что изменится…</div>
+            </div>
+            <div className="px-3 pt-2 pb-2.5">
+              <div className="text-xs font-semibold mb-0.5" style={{ color: "var(--foreground)" }}>Первые шаги</div>
+              <div style={{ fontSize: 10, color: "var(--muted)" }}>1. Составить список… 2. Написать…</div>
+            </div>
           </div>
-          <div>
-            <div className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>Желаемый результат</div>
-            <div className="text-xs" style={{ color: "var(--muted)", fontSize: 10 }}>К маю провести 3 мероприятия…</div>
-          </div>
-        </div>
-        <div className="px-3 py-2.5 flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#22c55e15" }}>
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#22c55e" strokeWidth="1.5"/><path d="M5 5h6M5 8h6M5 11h4" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round"/></svg>
-          </div>
-          <div>
-            <div className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>Первые шаги на неделе</div>
-            <div className="text-xs" style={{ color: "var(--muted)", fontSize: 10 }}>1. Составить список… 2. Встреча…</div>
-          </div>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }
@@ -294,15 +293,15 @@ function PanelReady() {
     <div className="flex flex-col h-full overflow-auto p-4 gap-3">
       {/* Hero */}
       <div
-        className="rounded-2xl p-5 text-center flex-shrink-0"
-        style={{
-          background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-          border: "1px solid #4F46E540",
-        }}
+        className="rounded-2xl px-5 py-4 flex-shrink-0"
+        style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)", border: "1px solid #4F46E540" }}
       >
-        <div className="text-2xl mb-1">✦</div>
-        <div className="text-base font-bold text-white mb-0.5">Карта заполнена</div>
-        <div className="text-xs" style={{ color: "#94a3b8" }}>Так будет выглядеть ваш результат</div>
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="w-4 h-4 rounded flex items-center justify-center text-xs" style={{ background: "#4F46E5", color: "#fff" }}>✦</div>
+          <span className="text-sm font-bold" style={{ color: "#e2e8f0" }}>Карта воспитательной среды</span>
+        </div>
+        <div className="text-xs font-medium" style={{ color: "#94a3b8" }}>Советник директора</div>
+        <div className="text-xs mt-0.5" style={{ color: "#64748b" }}>27 марта 2026</div>
       </div>
 
       {/* Score mini-map */}
