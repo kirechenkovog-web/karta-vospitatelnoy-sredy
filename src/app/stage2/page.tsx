@@ -481,23 +481,35 @@ export default function Stage2Page() {
   const [aspectCode, setAspectCode] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    const sidFromUrl = new URLSearchParams(window.location.search).get("sid");
+
+    const loadById = (sid: string) =>
+      fetch(`/api/session?sessionId=${sid}`)
+        .then((r) => r.json())
+        .then((full) => {
+          if (full.error) { router.push("/login"); return; }
+          const completed = full.scores?.filter((s: AspectScore) => s.status === "completed") ?? [];
+          const lines = completed.map((s: AspectScore) => {
+            const asp = ASPECTS.find((a) => a.code === s.aspectCode);
+            return `${asp?.title ?? s.aspectCode}: ${s.score}/10`;
+          });
+          if (lines.length > 0) {
+            setSessionContext(`Оценены аспекты: ${lines.join(", ")}.`);
+          }
+          setSession(full);
+        });
+
+    if (sidFromUrl) {
+      loadById(sidFromUrl);
+      return;
+    }
+
     fetch("/api/session", { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
         if (data.error) { router.push("/login"); return; }
-        return fetch(`/api/session?sessionId=${data.session.id}`)
-          .then((r) => r.json())
-          .then((full) => {
-            if (full.error) { router.push("/login"); return; }
-            const completed = full.scores?.filter((s: AspectScore) => s.status === "completed");
-            if (!completed || completed.length < 12) { router.push("/map"); return; }
-            const lines = completed.map((s: AspectScore) => {
-              const asp = ASPECTS.find((a) => a.code === s.aspectCode);
-              return `${asp?.title ?? s.aspectCode}: ${s.score}/10`;
-            });
-            setSessionContext(`Все 12 аспектов оценены. ${lines.join(", ")}.`);
-            setSession(full);
-          });
+        const session = data.session ?? data;
+        loadById(session.id);
       })
       .catch(() => router.push("/login"));
   }, [router]);
