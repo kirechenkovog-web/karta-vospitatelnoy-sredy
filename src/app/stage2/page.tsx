@@ -318,11 +318,11 @@ function Stage2Content({ session }: { session: Session }) {
       <div className="px-6 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#4F46E5" }}>КВС</div>
-          <StageNav currentStage={2} canGoStage2={true} canGoStage3={canGoStage3} />
+          <StageNav currentStage={2} canGoStage2={true} canGoStage3={canGoStage3} sessionId={session.id} />
         </div>
         <div className="flex items-center gap-3">
           {canGoStage3 && (
-            <Link href="/stage3">
+            <Link href={`/stage3?sid=${session.id}`}>
               <button
                 id="next-stage-button"
                 onClick={onNextStage}

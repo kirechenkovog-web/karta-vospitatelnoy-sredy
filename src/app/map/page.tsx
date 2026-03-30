@@ -317,7 +317,7 @@ function MapGrid({
           <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#4F46E5" }}>
             КВС
           </div>
-          <StageNav currentStage={1} canGoStage2={allCompleted} canGoStage3={canGoStage3} />
+          <StageNav currentStage={1} canGoStage2={allCompleted} canGoStage3={canGoStage3} sessionId={session.id} />
         </div>
         <div className="flex items-center gap-3">
           <div className="text-sm" style={{ color: "var(--muted)" }}>{completedCount}/12 оценено</div>
@@ -331,7 +331,7 @@ function MapGrid({
             <p className="text-xs" style={{ color: "var(--muted)" }}>Нажмите на аспект, чтобы начать оценку вместе с наставником.</p>
           </div>
           {allCompleted && (
-            <Link href="/stage2">
+            <Link href={`/stage2?sid=${session.id}`}>
               <button
                 id="next-stage-button"
                 onClick={onNextStage}

@@ -6,15 +6,16 @@ interface StageNavProps {
   currentStage: 1 | 2 | 3;
   canGoStage2: boolean;
   canGoStage3: boolean;
+  sessionId?: string;
 }
 
-const stages = [
-  { num: 1, label: "Оценка аспектов", path: "/map" },
-  { num: 2, label: "Углубление", path: "/stage2" },
-  { num: 3, label: "Фокус и стратегия", path: "/stage3" },
-];
-
-export default function StageNav({ currentStage, canGoStage2, canGoStage3 }: StageNavProps) {
+export default function StageNav({ currentStage, canGoStage2, canGoStage3, sessionId }: StageNavProps) {
+  const sid = sessionId ? `?sid=${sessionId}` : "";
+  const stages = [
+    { num: 1, label: "Оценка аспектов", path: "/map" + (sessionId ? `?sessionId=${sessionId}` : "") },
+    { num: 2, label: "Углубление", path: "/stage2" + sid },
+    { num: 3, label: "Фокус и стратегия", path: "/stage3" + sid },
+  ];
   return (
     <div className="flex items-center gap-1">
       {stages.map((stage, idx) => {

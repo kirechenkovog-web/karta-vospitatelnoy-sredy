@@ -86,7 +86,7 @@ function Stage3Content({ session }: { session: Session }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#4F46E5" }}>КВС</div>
-          <StageNav currentStage={3} canGoStage2={true} canGoStage3={true} />
+          <StageNav currentStage={3} canGoStage2={true} canGoStage3={true} sessionId={session.id} />
         </div>
       </div>
 
@@ -339,28 +339,40 @@ export default function Stage3Page() {
   const [sessionContext, setSessionContext] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    const sidFromUrl = new URLSearchParams(window.location.search).get("sid");
+
+    const loadById = (sid: string) =>
+      fetch(`/api/session?sessionId=${sid}`)
+        .then((r) => r.json())
+        .then((full) => {
+          if (full.error) { router.push("/login"); return; }
+          const lines = (full.scores ?? [])
+            .filter((s: AspectScore) => s.score != null)
+            .map((s: AspectScore) => {
+              const asp = ASPECTS.find((a) => a.code === s.aspectCode);
+              return `${asp?.title ?? s.aspectCode}: ${s.score}/10`;
+            });
+          const divedTitles = (full.deepDives ?? []).map((dd: { aspectCode: string }) => {
+            const asp = ASPECTS.find((a) => a.code === dd.aspectCode);
+            return asp?.title ?? dd.aspectCode;
+          });
+          if (lines.length > 0) {
+            setSessionContext(`Оценки: ${lines.join(", ")}. Углублённый анализ по: ${divedTitles.join(", ")}.`);
+          }
+          setSession(full);
+        });
+
+    if (sidFromUrl) {
+      loadById(sidFromUrl);
+      return;
+    }
+
     fetch("/api/session", { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
         if (data.error) { router.push("/login"); return; }
-        return fetch(`/api/session?sessionId=${data.session.id}`)
-          .then((r) => r.json())
-          .then((full) => {
-            if (full.error) { router.push("/login"); return; }
-            if (!full.deepDives?.length) { router.push("/stage2"); return; }
-            const lines = (full.scores ?? [])
-              .filter((s: AspectScore) => s.score != null)
-              .map((s: AspectScore) => {
-                const asp = ASPECTS.find((a) => a.code === s.aspectCode);
-                return `${asp?.title ?? s.aspectCode}: ${s.score}/10`;
-              });
-            const divedTitles = (full.deepDives ?? []).map((dd: { aspectCode: string }) => {
-              const asp = ASPECTS.find((a) => a.code === dd.aspectCode);
-              return asp?.title ?? dd.aspectCode;
-            });
-            setSessionContext(`Оценки: ${lines.join(", ")}. Углублённый анализ по: ${divedTitles.join(", ")}.`);
-            setSession(full);
-          });
+        const s = data.session ?? data;
+        loadById(s.id);
       })
       .catch(() => router.push("/login"));
   }, [router]);
